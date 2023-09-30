@@ -4,7 +4,7 @@ use bevy::{
 };
 use hexx::*;
 
-const HEX_SIZE: Vec2 = Vec2::splat(13.0);
+const HEX_SIZE: Vec2 = Vec2::splat(10.0);
 
 pub fn hexx_mesh() -> Mesh {
     let layout = HexLayout {
