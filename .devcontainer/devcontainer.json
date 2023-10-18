@@ -17,13 +17,13 @@
 				"streetsidesoftware.code-spell-checker"
 			]
 		}
-	}
+	},
 
 	// Use 'forwardPorts' to make a list of ports inside the container available locally.
 	// "forwardPorts": [],
 
 	// Use 'postCreateCommand' to run commands after the container is created.
-	// "postCreateCommand": "rustc --version",
+	"postCreateCommand": "sudo apt-get update && sudo apt-get install librust-alsa-sys-dev -y && sudo apt-get install libudev-dev -y",
 
 	// Uncomment to connect as root instead. More info: https://aka.ms/dev-containers-non-root.
 	// "remoteUser": "root"
