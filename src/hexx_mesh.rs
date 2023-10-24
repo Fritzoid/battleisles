@@ -4,14 +4,8 @@ use bevy::{
 };
 use hexx::*;
 
-const HEX_SIZE: Vec2 = Vec2::splat(10.0);
-
-pub fn hexx_mesh() -> Mesh {
-    let layout = HexLayout {
-        hex_size: HEX_SIZE,
-        ..default()
-    };
-    return hexagonal_plane(&layout);
+pub fn hexx_mesh(hex_layout: &HexLayout) -> Mesh {
+    return hexagonal_plane(&hex_layout);
 }
 
 fn hexagonal_plane(hex_layout: &HexLayout) -> Mesh {
