@@ -1,6 +1,6 @@
 use std::collections::HashMap;
 
-use bevy::{prelude::*, window::PrimaryWindow};
+use bevy::{prelude::*, window::PrimaryWindow, input::mouse::MouseWheel};
 use hexx::*;
 mod hexx_mesh;
 
@@ -19,54 +19,44 @@ fn main() {
 }
 
 fn setup_camera(mut commands: Commands) {
-    let cam = 
-        Camera3dBundle {
-            transform: Transform::from_translation(Vec3::new(0., 0.,300.))
-                .looking_at(Vec3::ZERO, Vec3::Y),
-            ..Default::default()
-        };
-
-    commands.spawn(cam);
+    commands.spawn(Camera2dBundle {
+        global_transform: GlobalTransform::from_xyz(0., 0., 3000.),
+        ..Default::default()
+    });
 }
 
 #[derive(Debug, Resource)]
 struct BattleMap {
     layout: HexLayout,
     entities: HashMap<Hex, Entity>,
-    default_material: Handle<StandardMaterial>,
-    selected_material: Handle<StandardMaterial>,
+    default_material: Handle<ColorMaterial>,
+    selected_material: Handle<ColorMaterial>,
 }
  
 fn setup_battlemap(
     mut commands: Commands, 
     mut meshes: ResMut<Assets<Mesh>>,
-    mut materials: ResMut<Assets<StandardMaterial>>,
+    mut materials: ResMut<Assets<ColorMaterial>>,
 ) {
 
     let layout = HexLayout {
-        hex_size: Vec2::splat(10.0),
+        hex_size: Vec2::splat(20.0),
         ..Default::default()
     };
 
     let default_material = 
-        materials.add(StandardMaterial {
-            base_color: Color::hex("#0000FF").unwrap(), 
-            ..Default::default()
-        });
+        materials.add(Color::BLUE.into());
     let selected_material = 
-        materials.add(StandardMaterial {
-            base_color: Color::hex("#FF0000").unwrap(), 
-            ..Default::default()
-        });
+        materials.add(Color::RED.into());
 
     let hexx_mesh: Mesh = hexx_mesh::hexx_mesh(&layout);
     let mesh = meshes.add(hexx_mesh);
 
-    let entities = shapes::flat_rectangle([-5, 5, -5, 5])
+    let entities = shapes::flat_rectangle([-50, 50, -50, 50])
         .map(|hex| {
             let pos = layout.hex_to_world_pos(hex);
             let id = commands
-                .spawn(PbrBundle {
+                .spawn(ColorMesh2dBundle {
                     transform: Transform::from_xyz(pos.x, pos.y, 0.0).with_scale(Vec3::splat(0.99)),
                     mesh: mesh.clone().into(),
                     material: default_material.clone(),
@@ -89,21 +79,38 @@ fn handle_input(
     mut commands: Commands,
     windows: Query<&Window, With<PrimaryWindow>>,
     cameras: Query<(&Camera, &GlobalTransform)>,
+    buttons: Res<Input<MouseButton>>,
+    mut scroll: EventReader<MouseWheel>,
     map: Res<BattleMap>,
 ) {
     let window = windows.single();
     let (camera, cam_transform) = cameras.single();
     if let Some(pos) = window
         .cursor_position()
-//        .and_then(|p| camera.viewport_to_world(cam_transform, p))
+        .and_then(|p| camera.viewport_to_world_2d(cam_transform, p))
     {
-/*
-        let coord = map.layout.world_pos_to_hex(pos.direction.);
-        if let Some(entity) = map.entities.get(&coord).copied() {
-            commands
-                .entity(entity)
-                .insert(map.selected_material.clone());
+        if buttons.just_pressed(MouseButton::Left) {
+            let coord = map.layout.world_pos_to_hex(pos);
+            if let Some(entity) = map.entities.get(&coord).copied() {
+                commands
+                    .entity(entity)
+                    .insert(map.selected_material.clone());
+            }
+            let x = coord.x;
+            let y = coord.y;
+//            println!("{x},{y}");  
         }
- */ 
-   }
+
+        use bevy::input::mouse::MouseScrollUnit;
+        for ev in scroll.iter() {
+            match ev.unit {
+                MouseScrollUnit::Line => {
+                }
+                MouseScrollUnit::Pixel => {
+                    println!("Scroll (pixel units): vertical: {}, horizontal: {}", ev.y, ev.x);
+                }
+            }
+        }
+//        println!("{pos}");
+    }
 }
