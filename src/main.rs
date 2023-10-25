@@ -9,6 +9,7 @@ fn main() {
         .add_plugins(DefaultPlugins.set(WindowPlugin {
             primary_window: Some(Window {
                 resolution: (1_000.0, 1_000.0).into(),
+                canvas: Some("#bevy".to_owned()),
                 ..default()
             }),
             ..default()
@@ -52,7 +53,7 @@ fn setup_battlemap(
     let hexx_mesh: Mesh = hexx_mesh::hexx_mesh(&layout);
     let mesh = meshes.add(hexx_mesh);
 
-    let entities = shapes::flat_rectangle([-50, 50, -50, 50])
+    let entities = shapes::flat_rectangle([-5, 5, -5, 5])
         .map(|hex| {
             let pos = layout.hex_to_world_pos(hex);
             let id = commands

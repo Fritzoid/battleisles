@@ -23,7 +23,7 @@
 	// "forwardPorts": [],
 
 	// Use 'postCreateCommand' to run commands after the container is created.
-	"postCreateCommand": "sudo apt-get update && sudo apt-get install librust-alsa-sys-dev -y && sudo apt-get install libudev-dev -y",
+	"postCreateCommand": "sudo apt-get update && sudo apt-get install librust-alsa-sys-dev -y && sudo apt-get install libudev-dev -y && cargo install --locked trunk && rustup target add wasm32-unknown-unknown && cargo install --locked wasm-bindgen-cli",
 
 	// Uncomment to connect as root instead. More info: https://aka.ms/dev-containers-non-root.
 	// "remoteUser": "root"
