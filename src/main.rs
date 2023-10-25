@@ -8,7 +8,7 @@ fn main() {
     App::new()
         .add_plugins(DefaultPlugins.set(WindowPlugin {
             primary_window: Some(Window {
-                resolution: (1_000.0, 1_000.0).into(),
+                resolution: (800.0, 600.0).into(),
                 canvas: Some("#bevy".to_owned()),
                 ..default()
             }),
@@ -20,10 +20,7 @@ fn main() {
 }
 
 fn setup_camera(mut commands: Commands) {
-    commands.spawn(Camera2dBundle {
-        global_transform: GlobalTransform::from_xyz(0., 0., 3000.),
-        ..Default::default()
-    });
+    commands.spawn(Camera2dBundle::default());
 }
 
 #[derive(Debug, Resource)]
@@ -97,9 +94,6 @@ fn handle_input(
                     .entity(entity)
                     .insert(map.selected_material.clone());
             }
-            let x = coord.x;
-            let y = coord.y;
-//            println!("{x},{y}");  
         }
 
         use bevy::input::mouse::MouseScrollUnit;
@@ -112,6 +106,5 @@ fn handle_input(
                 }
             }
         }
-//        println!("{pos}");
     }
 }
