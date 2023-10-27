@@ -101,6 +101,7 @@ fn handle_input(
     buttons: Res<Input<MouseButton>>,
     map: Res<BattleMap>,
 ) {
+/*
     let window = windows.single();
     let (camera, cam_transform) = cameras.single();
     if let Some(pos) = window
@@ -123,4 +124,5 @@ fn handle_input(
             }
         }
     }
+*/
 }
