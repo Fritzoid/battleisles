@@ -28,8 +28,6 @@ fn main() {
 struct BattleMap {
     layout: HexLayout,
     entities: HashMap<Hex, Entity>,
-    default_material: Handle<StandardMaterial>,
-    selected_material: Handle<StandardMaterial>,
 }
 
 #[derive(Component)]
@@ -41,8 +39,7 @@ fn setup(
     mut materials: ResMut<Assets<StandardMaterial>>,
 ) {
     let layout = HexLayout { hex_size: Vec2::splat(20.0),  ..default()};
-    let default_material = materials.add(Color::BLUE.into());
-    let selected_material = materials.add(Color::RED.into());
+    let material = materials.add(Color::BLUE.into());
     let hexx_mesh: Mesh = hexx_plane(&layout);
     let mesh = meshes.add(hexx_mesh);
 
@@ -68,7 +65,7 @@ fn setup(
                 .spawn(PbrBundle {
                     transform: Transform::from_xyz(pos.x, pos.y, 0.0).with_scale(Vec3::splat(0.99)),
                     mesh: mesh.clone().into(),
-                    material: default_material.clone(),
+                    material: material.clone(),
                     ..default()
                 })
                 .id();
@@ -79,8 +76,6 @@ fn setup(
     commands.insert_resource(BattleMap {
         layout,
         entities,
-        default_material, 
-        selected_material,
     });
 }
 
@@ -95,13 +90,11 @@ fn hexx_plane(hex_layout: &HexLayout) -> Mesh {
 }
 
 fn handle_input(
-    mut commands: Commands,
     windows: Query<&Window, With<PrimaryWindow>>,
     cameras: Query<(&Camera, &GlobalTransform)>,
     buttons: Res<Input<MouseButton>>,
     map: Res<BattleMap>,
 ) {
-/*
     let window = windows.single();
     let (camera, cam_transform) = cameras.single();
     if let Some(pos) = window
@@ -110,19 +103,9 @@ fn handle_input(
     {
         if buttons.just_pressed(MouseButton::Left) {
             let coord = map.layout.world_pos_to_hex(pos);
-            for e in map.entities.iter()
-            {
-                commands
-                    .entity(*e.1)
-                    .insert(map.default_material.clone());
-            }
-
             if let Some(entity) = map.entities.get(&coord).copied() {
-                commands
-                    .entity(entity)
-                    .insert(map.selected_material.clone());
+                dbg!(entity);
             }
         }
     }
-*/
 }
