@@ -9,15 +9,15 @@
 	// "features": {},
 
 	// Configure tool-specific properties.
-	"customizations": {
+	//"customizations": {
 		// Configure properties specific to VS Code.
-		"vscode": {
-			"settings": {},
-			"extensions": [
-				"streetsidesoftware.code-spell-checker"
-			]
-		}
-	},
+	//	"vscode": {
+	//		"settings": {},
+	//		"extensions": [
+	//			"streetsidesoftware.code-spell-checker"
+	//		]
+	//	}
+	// },
 
 	// Use 'forwardPorts' to make a list of ports inside the container available locally.
 	// "forwardPorts": [],
