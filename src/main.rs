@@ -38,7 +38,7 @@ fn setup(
     mut meshes: ResMut<Assets<Mesh>>,
     mut materials: ResMut<Assets<StandardMaterial>>,
 ) {
-    let layout = HexLayout { hex_size: Vec2::splat(20.0),  ..default()};
+    let layout = HexLayout { hex_size: Vec2::splat(1.0),  ..default()};
     let material = materials.add(Color::BLUE.into());
     let hexx_mesh: Mesh = hexx_plane(&layout);
     let mesh = meshes.add(hexx_mesh);
@@ -48,9 +48,9 @@ fn setup(
         MyGameCamera,
         PanOrbitCamera {
             focus: Vec3::new(0.0, 0.0, 0.0),
-            alpha: Some(0.),
-            beta: Some(0.),
-            radius: Some(200.0),
+            alpha: Some(1.5),
+            beta: Some(1.5),
+            radius: Some(5.0),
             orbit_sensitivity: 1.5,
             pan_sensitivity: 0.5,
             zoom_sensitivity: 0.5,
@@ -58,12 +58,12 @@ fn setup(
         },
     ));
 
-    let entities = shapes::flat_rectangle([-5, 5, -5, 5])
+    let entities = shapes::flat_rectangle([-1, 1, -1, 1])
         .map(|hex| {
             let pos = layout.hex_to_world_pos(hex);
             let id = commands
                 .spawn(PbrBundle {
-                    transform: Transform::from_xyz(pos.x, pos.y, 0.0).with_scale(Vec3::splat(0.99)),
+                    transform: Transform::from_xyz(pos.x, 0.0, -pos.y).with_scale(Vec3::splat(0.99)),
                     mesh: mesh.clone().into(),
                     material: material.clone(),
                     ..default()
@@ -80,7 +80,7 @@ fn setup(
 }
 
 fn hexx_plane(hex_layout: &HexLayout) -> Mesh {
-    let mesh_info: MeshInfo = PlaneMeshBuilder::new(hex_layout).facing(Vec3::Z).build();
+    let mesh_info: MeshInfo = PlaneMeshBuilder::new(hex_layout).build();
     let mut mesh = Mesh::new(PrimitiveTopology::TriangleList);
     mesh.insert_attribute(Mesh::ATTRIBUTE_POSITION, mesh_info.vertices);
     mesh.insert_attribute(Mesh::ATTRIBUTE_NORMAL, mesh_info.normals);
