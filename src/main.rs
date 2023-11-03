@@ -63,7 +63,7 @@ fn setup(
             let pos = layout.hex_to_world_pos(hex);
             let id = commands
                 .spawn(PbrBundle {
-                    transform: Transform::from_xyz(pos.x, 0.0, -pos.y).with_scale(Vec3::splat(0.99)),
+                    transform: Transform::from_xyz(pos.x, 0.0, -pos.y),
                     mesh: mesh.clone().into(),
                     material: material.clone(),
                     ..default()
@@ -80,7 +80,7 @@ fn setup(
 }
 
 fn hexx_plane(hex_layout: &HexLayout) -> Mesh {
-    let mesh_info: MeshInfo = PlaneMeshBuilder::new(hex_layout).build();
+    let mesh_info: MeshInfo = ColumnMeshBuilder::new(hex_layout, 0.2).build();
     let mut mesh = Mesh::new(PrimitiveTopology::TriangleList);
     mesh.insert_attribute(Mesh::ATTRIBUTE_POSITION, mesh_info.vertices);
     mesh.insert_attribute(Mesh::ATTRIBUTE_NORMAL, mesh_info.normals);
