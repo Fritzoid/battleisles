@@ -7,6 +7,9 @@ use bevy::render::render_resource::PrimitiveTopology;
 use bevy_panorbit_camera::{PanOrbitCamera, PanOrbitCameraPlugin};
 use hexx::*;
 
+mod battle_map;
+use battle_map::*;
+
 fn main() {
     App::new()
         .add_plugins(DefaultPlugins.set(WindowPlugin {
@@ -25,13 +28,13 @@ fn main() {
 
 
 #[derive(Resource)]
-struct BattleMap {
+struct BevyBattleMap {
     layout: HexLayout,
     entities: HashMap<Hex, Entity>,
 }
 
 #[derive(Component)]
-struct MyGameCamera;
+struct GameCamera;
 
 fn setup(
     mut commands: Commands, 
@@ -40,12 +43,12 @@ fn setup(
 ) {
     let layout = HexLayout { hex_size: Vec2::splat(1.0),  ..default()};
     let material = materials.add(Color::BLUE.into());
-    let hexx_mesh: Mesh = hexx_plane(&layout);
+    let hexx_mesh: Mesh = hexx_mesh(&layout);
     let mesh = meshes.add(hexx_mesh);
 
     commands.spawn((
         Camera3dBundle::default(),
-        MyGameCamera,
+        GameCamera,
         PanOrbitCamera {
             focus: Vec3::new(0.0, 0.0, 0.0),
             alpha: Some(1.5),
@@ -73,13 +76,21 @@ fn setup(
         })
         .collect();
 
-    commands.insert_resource(BattleMap {
+    let map = BattleMap::new();
+    let json = map.to_json();
+    println!("{}", json);
+
+    let palle = "{\"size\":[3,3],\"hexes\":[{\"hex_type\":\"Ocean\"},{\"hex_type\":\"Plain\"},{\"hex_type\":\"Water\"},{\"hex_type\":\"Mountain\"}]}";
+    let newmap = battle_map::BattleMap::from_json(palle);
+    dbg!(newmap);
+
+    commands.insert_resource(BevyBattleMap {
         layout,
         entities,
     });
 }
 
-fn hexx_plane(hex_layout: &HexLayout) -> Mesh {
+fn hexx_mesh(hex_layout: &HexLayout) -> Mesh {
     let mesh_info: MeshInfo = ColumnMeshBuilder::new(hex_layout, 0.2).build();
     let mut mesh = Mesh::new(PrimitiveTopology::TriangleList);
     mesh.insert_attribute(Mesh::ATTRIBUTE_POSITION, mesh_info.vertices);
@@ -93,7 +104,7 @@ fn handle_input(
     windows: Query<&Window, With<PrimaryWindow>>,
     cameras: Query<(&Camera, &GlobalTransform)>,
     buttons: Res<Input<MouseButton>>,
-    map: Res<BattleMap>,
+    map: Res<BevyBattleMap>,
 ) {
     let window = windows.single();
     let (camera, cam_transform) = cameras.single();
