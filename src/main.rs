@@ -76,14 +76,6 @@ fn setup(
         })
         .collect();
 
-    let map = BattleMap::new();
-    let json = map.to_json();
-    println!("{}", json);
-
-    let palle = "{\"size\":[3,3],\"hexes\":[{\"hex_type\":\"Ocean\"},{\"hex_type\":\"Plain\"},{\"hex_type\":\"Water\"},{\"hex_type\":\"Mountain\"}]}";
-    let newmap = battle_map::BattleMap::from_json(palle);
-    dbg!(newmap);
-
     commands.insert_resource(BevyBattleMap {
         layout,
         entities,
