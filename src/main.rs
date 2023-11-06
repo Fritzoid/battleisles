@@ -61,6 +61,24 @@ fn setup(
         },
     ));
 
+    // temp
+
+    let bm = BattleMap::from_json(r#"{"size":[3,3],"hexes":[
+        {"hex_type":"Ocean"},
+        {"hex_type":"Plain"},
+        {"hex_type":"Hill"},
+        {"hex_type":"Ocean"},
+        {"hex_type":"Plain"},
+        {"hex_type":"Hill"},
+        {"hex_type":"Ocean"},
+        {"hex_type":"Plain"},
+        {"hex_type":"Hill"}
+    ]}"#);
+    let json = bm.to_json();
+    println!("{}", json);
+
+    // temp
+
     let entities = shapes::flat_rectangle([-1, 1, -1, 1])
         .map(|hex| {
             let pos = layout.hex_to_world_pos(hex);
