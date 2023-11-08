@@ -17,4 +17,6 @@ If you want wasm support:
     
     - run 'trunk serve'
 
+If you want to use a codespace, everything should be ready in .devcontainer
+
 
