@@ -10,7 +10,17 @@ use hexx::*;
 mod battle_map;
 use battle_map::*;
 
+mod unit;
+use unit::*;
+
 fn main() {
+
+    let mut tank = Unit::Tank(Position::new((0, 0)), HitPoints::new(100));
+    tank.relocate((1,1));   
+
+    let mut sam_site = Unit::SamSite(Position::new((3,3)), HitPoints::new(100));
+    sam_site.take(4);
+
     App::new()
         .add_plugins(DefaultPlugins.set(WindowPlugin {
             primary_window: Some(Window {
@@ -25,6 +35,7 @@ fn main() {
         .add_systems(Update, handle_input)
         .run()
 }
+
 
 
 #[derive(Resource)]
