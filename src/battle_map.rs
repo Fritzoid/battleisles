@@ -10,14 +10,14 @@ enum HexType {
 }
 
 #[derive(Serialize, Deserialize, Debug)]
-struct Hex {
+struct BattleHex {
     hex_type: HexType,
 }
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct BattleMap {
     size: (u16,u16), 
-    hexes: Vec<Hex>,
+    hexes: Vec<BattleHex>,
 }
 
 impl BattleMap {
@@ -40,7 +40,26 @@ impl BattleMap {
 #[cfg(test)]
 mod tests {
 
+    use hexx::Hex;
+
     use super::*;
+
+    #[test]
+    fn hexx_test() {
+        let rect = hexx::shapes::flat_rectangle([-1, 1, -1, 1]);
+        assert_eq!(rect.size_hint().0, 9);
+
+        for (_,h) in rect.enumerate() {
+            println!("x = {}, y = {}", h.x, h.y);
+        }
+        println!("--------");
+
+        let hexa = hexx::shapes::hexagon(Hex::new(0, 0), 3);
+
+        for (_,h) in hexa.enumerate() {
+            println!("x = {}, y = {}", h.x, h.y);
+        }
+    }        
 
     #[test]
     fn from_json_test() {
@@ -70,13 +89,13 @@ mod tests {
         let map = BattleMap {
             size: (1, 3),
             hexes: vec![
-                Hex {
+                BattleHex {
                     hex_type: HexType::Ocean
                 },
-                Hex {
+                BattleHex {
                     hex_type: HexType::Plain
                 },
-                Hex {
+                BattleHex {
                     hex_type: HexType::Water
                 },
             ]
