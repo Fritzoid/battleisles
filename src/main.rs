@@ -40,9 +40,8 @@ fn setup(
     mut meshes: ResMut<Assets<Mesh>>,
     mut materials: ResMut<Assets<ColorMaterial>>    
 ) {
-    let battle_map = battle_map::BattleMap::new((5,5));
+    let battle_map = battle_map::BattleMap::new((3,3));
     let layout = HexLayout { hex_size: Vec2::splat(10.0),  ..default()};
-    let default_material = materials.add(Color::WHITE.into());
     let mesh = hexagonal_plane(&layout);
     let mesh_handle = meshes.add(mesh);
 
@@ -51,14 +50,26 @@ fn setup(
         GameCamera,
     ));
 
-    let entities = shapes::flat_rectangle([-2, 2, -2, 2])
-        .map(|hex| {
+    let right: i32 = battle_map.size.0 as i32 / 2;
+    let left = -right;
+    let bottom: i32 = battle_map.size.1 as i32 / 2;
+    let top = -bottom;
+
+    let entities = shapes::flat_rectangle([left, right, top, bottom])
+        .zip(battle_map.hexes.iter())
+        .map(|(hex, battle_hex)| {
             let pos = layout.hex_to_world_pos(hex);
             let id = commands
                 .spawn(ColorMesh2dBundle {
                     transform: Transform::from_xyz(pos.x, pos.y, 0.0),
                     mesh: mesh_handle.clone().into(),
-                    material: default_material.clone(),
+                    material: match battle_hex.hex_type { 
+                        battle_map::HexType::DeepWater => materials.add(Color::BLUE.into()),
+                        battle_map::HexType::ShallowWater => materials.add(Color::AZURE.into()),
+                        battle_map::HexType::Plains => materials.add(Color::GREEN.into()),
+                        battle_map::HexType::Mountains => materials.add(Color::GRAY.into()),
+                        battle_map::HexType::Hills => materials.add(Color::YELLOW_GREEN.into()),
+                    },
                     ..default()
                 })
                 .id();

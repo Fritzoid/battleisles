@@ -1,7 +1,7 @@
 # battleisles
 Nostalgia version of battle isles 
 
-Using rust 1.71.1
+Using rust 1.74.1
 
 clone and run 'cargo run'
 

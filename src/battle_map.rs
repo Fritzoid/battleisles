@@ -1,7 +1,7 @@
 use serde::{Deserialize, Serialize};
 
 #[derive(Serialize, Deserialize, Debug, Clone, PartialEq)]
-enum HexType {
+pub enum HexType {
     DeepWater,
     ShallowWater,
     Plains,
@@ -10,20 +10,21 @@ enum HexType {
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
-struct BattleHex {
-    hex_type: HexType,
+pub struct BattleHex {
+    pub hex_type: HexType,
 }
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct BattleMap {
-    size: (u16,u16), 
-    hexes: Vec<BattleHex>,
+    pub size: (u16,u16), 
+    pub hexes: Vec<BattleHex>,
 }
 
 impl BattleMap {
 
     pub fn new(size: (u16,u16)) -> BattleMap {
-        let hexes = vec![BattleHex { hex_type: HexType::DeepWater }; (size.0 * size.1) as usize];
+        let mut hexes = vec![BattleHex { hex_type: HexType::DeepWater }; (size.0 * size.1) as usize];
+        hexes[4] = BattleHex { hex_type: HexType::Plains };
         BattleMap { size, hexes }
     }
 
