@@ -3,7 +3,7 @@ pub trait Move {
 }
 
 pub trait Damage {
-    fn take(&mut self, damage: i32);
+    fn take_damage(&mut self, damage: i32);
 }
 
 pub struct Position {
@@ -37,7 +37,7 @@ impl Move for Position {
 }
 
 impl Damage for HitPoints {
-    fn take(&mut self, damage: i32) {
+    fn take_damage(&mut self, damage: i32) {
         self.hit_points -= damage;
     }
 }
@@ -58,8 +58,8 @@ impl<Position: Move, HitPoints: Damage> Unit<Position, HitPoints> {
 
     pub fn take(&mut self, damage: i32) {
         match self {
-            Unit::Tank(_, hit_points) => hit_points.take(damage),
-            Unit::SamSite(_, hit_points) => hit_points.take(damage),
+            Unit::Tank(_, hit_points) => hit_points.take_damage(damage),
+            Unit::SamSite(_, hit_points) => hit_points.take_damage(damage),
         }
     }
 }

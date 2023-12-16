@@ -1,15 +1,15 @@
 use serde::{Deserialize, Serialize};
 
-#[derive(Serialize, Deserialize, Debug, PartialEq)]
+#[derive(Serialize, Deserialize, Debug, Clone, PartialEq)]
 enum HexType {
-    Ocean,
-    Water,
-    Plain,
-    Hill,
-    Mountain,
+    DeepWater,
+    ShallowWater,
+    Plains,
+    Hills,
+    Mountains,
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 struct BattleHex {
     hex_type: HexType,
 }
@@ -21,6 +21,11 @@ pub struct BattleMap {
 }
 
 impl BattleMap {
+
+    pub fn new(size: (u16,u16)) -> BattleMap {
+        let hexes = vec![BattleHex { hex_type: HexType::DeepWater }; (size.0 * size.1) as usize];
+        BattleMap { size, hexes }
+    }
 
     pub fn from_json(input: &str) -> BattleMap {
         match serde_json::from_str(input) {
@@ -39,26 +44,12 @@ impl BattleMap {
 
 #[cfg(test)]
 mod tests {
-
-    use hexx::Hex;
-
     use super::*;
 
     #[test]
     fn hexx_test() {
         let rect = hexx::shapes::flat_rectangle([-1, 1, -1, 1]);
         assert_eq!(rect.size_hint().0, 9);
-
-        for (_,h) in rect.enumerate() {
-            println!("x = {}, y = {}", h.x, h.y);
-        }
-        println!("--------");
-
-        let hexa = hexx::shapes::hexagon(Hex::new(0, 0), 3);
-
-        for (_,h) in hexa.enumerate() {
-            println!("x = {}, y = {}", h.x, h.y);
-        }
     }        
 
     #[test]
@@ -66,42 +57,48 @@ mod tests {
         let mapstr =  r#"{
             "size":[3,3],
             "hexes":[
-                {"hex_type":"Ocean"},
-                {"hex_type":"Plain"},
-                {"hex_type":"Water"},
-                {"hex_type":"Mountain"}, 
-                {"hex_type":"Ocean"}, 
-                {"hex_type":"Ocean"}, 
-                {"hex_type":"Ocean"}, 
-                {"hex_type":"Ocean"}, 
-                {"hex_type":"Ocean"}
+                {"hex_type":"DeepWater"},
+                {"hex_type":"Plains"},
+                {"hex_type":"ShallowWater"},
+                {"hex_type":"Mountains"}, 
+                {"hex_type":"Hills"}, 
+                {"hex_type":"DeepWater"}, 
+                {"hex_type":"DeepWater"}, 
+                {"hex_type":"DeepWater"}, 
+                {"hex_type":"DeepWater"}
             ]
         }"#;
         let map = BattleMap::from_json(mapstr);
         assert_eq!(map.size, (3,3));
         assert_eq!(map.hexes.len(), 9);
-        assert_eq!(map.hexes[0].hex_type, HexType::Ocean);
-        assert_eq!(map.hexes[3].hex_type, HexType::Mountain);
+        assert_eq!(map.hexes[0].hex_type, HexType::DeepWater);
+        assert_eq!(map.hexes[3].hex_type, HexType::Mountains);
     }
 
     #[test]
     fn to_json_test() {
         let map = BattleMap {
-            size: (1, 3),
+            size: (1, 5),
             hexes: vec![
                 BattleHex {
-                    hex_type: HexType::Ocean
+                    hex_type: HexType::DeepWater
                 },
                 BattleHex {
-                    hex_type: HexType::Plain
+                    hex_type: HexType::ShallowWater
                 },
                 BattleHex {
-                    hex_type: HexType::Water
+                    hex_type: HexType::Plains
+                },
+                BattleHex {
+                    hex_type: HexType::Mountains
+                },
+                BattleHex {
+                    hex_type: HexType::Hills
                 },
             ]
         };
 
-        let json = r#"{"size":[1,3],"hexes":[{"hex_type":"Ocean"},{"hex_type":"Plain"},{"hex_type":"Water"}]}"#;
+        let json = r#"{"size":[1,5],"hexes":[{"hex_type":"DeepWater"},{"hex_type":"ShallowWater"},{"hex_type":"Plains"},{"hex_type":"Mountains"},{"hex_type":"Hills"}]}"#;
         let output = map.to_json();
         assert_eq!(output, json);
     }
