@@ -1,30 +1,30 @@
 use std::collections::HashMap;
 use bevy::prelude::*; 
-use bevy::window::WindowResolution;
 use bevy::window::PrimaryWindow;
+use bevy::window::WindowMode;
 use bevy::render::mesh::Indices;
 use bevy::render::render_resource::PrimitiveTopology;
+use bevy_pancam::{PanCamPlugin, PanCam};
 use hexx::*;
 
 mod battle_map;
 mod unit;
+mod ui;
 
 fn main() {
     App::new()
-        .add_plugins(DefaultPlugins.set(WindowPlugin {
+        .add_plugins((DefaultPlugins.set(WindowPlugin {
             primary_window: Some(Window {
-                resolution: WindowResolution::new(800., 600.),
+                mode: WindowMode::BorderlessFullscreen, 
                 canvas: Some("#bevy".to_owned()),
                 ..default()
             }),
             ..default()
-        }))
+        }),PanCamPlugin::default()))
         .add_systems(Startup, setup)
         .add_systems(Update, handle_input)
         .run()
 }
-
-
 
 #[derive(Resource)]
 struct BevyBattleMap {
@@ -48,7 +48,9 @@ fn setup(
     commands.spawn((
         Camera2dBundle::default(),
         GameCamera,
-    ));
+    )).insert(PanCam::default());
+
+    ui::Ui::setup_ui(&mut commands);
 
     let right: i32 = battle_map.size.0 as i32 / 2;
     let left = -right;
@@ -64,9 +66,9 @@ fn setup(
                     transform: Transform::from_xyz(pos.x, pos.y, 0.0),
                     mesh: mesh_handle.clone().into(),
                     material: match battle_hex.hex_type { 
-                        battle_map::HexType::DeepWater => materials.add(Color::BLUE.into()),
+                        battle_map::HexType::DeepWater => materials.add(Color::rgb(0.35, 0.5, 0.8).into()),
                         battle_map::HexType::ShallowWater => materials.add(Color::AZURE.into()),
-                        battle_map::HexType::Plains => materials.add(Color::GREEN.into()),
+                        battle_map::HexType::Plains => materials.add(Color::rgb(0.35, 0.8, 0.5).into()),
                         battle_map::HexType::Mountains => materials.add(Color::GRAY.into()),
                         battle_map::HexType::Hills => materials.add(Color::YELLOW_GREEN.into()),
                     },
