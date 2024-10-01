@@ -1,5 +1,6 @@
 use std::collections::HashMap;
 use bevy::prelude::*; 
+use bevy::render::render_asset::RenderAssetUsages;
 use bevy::window::PrimaryWindow;
 use bevy::window::WindowMode;
 use bevy::render::mesh::Indices;
@@ -23,7 +24,7 @@ fn main() {
         }),PanCamPlugin::default()))
         .add_systems(Startup, setup)
         .add_systems(Update, handle_input)
-        .run()
+        .run();
 }
 
 #[derive(Resource)]
@@ -82,11 +83,11 @@ fn setup(
                     transform: Transform::from_xyz(pos.x, pos.y, 0.0),
                     mesh: mesh_handle.clone().into(),
                     material: match battle_hex.hex_type { 
-                        battle_map::HexType::DeepWater => materials.add(Color::rgb(0.35, 0.5, 0.8).into()),
-                        battle_map::HexType::ShallowWater => materials.add(Color::AZURE.into()),
-                        battle_map::HexType::Plains => materials.add(Color::rgb(0.35, 0.8, 0.5).into()),
-                        battle_map::HexType::Mountains => materials.add(Color::GRAY.into()),
-                        battle_map::HexType::Hills => materials.add(Color::YELLOW_GREEN.into()),
+                        battle_map::HexType::DeepWater => materials.add(ColorMaterial::from_color(bevy::color::palettes::css::DARK_BLUE)),
+                        battle_map::HexType::ShallowWater => materials.add(ColorMaterial::from_color(bevy::color::palettes::css::BLUE)),
+                        battle_map::HexType::Plains => materials.add(ColorMaterial::from_color(bevy::color::palettes::css::GREEN)),
+                        battle_map::HexType::Mountains => materials.add(ColorMaterial::from_color(bevy::color::palettes::css::GRAY)),
+                        battle_map::HexType::Hills => materials.add(ColorMaterial::from_color(bevy::color::palettes::css::YELLOW)),
                     },
                     ..default()
                 })
@@ -101,10 +102,9 @@ fn setup(
     });
 }
 
-fn handle_input(
-    windows: Query<&Window, With<PrimaryWindow>>,
+fn handle_input(    windows: Query<&Window, With<PrimaryWindow>>,
     cameras: Query<(&Camera, &GlobalTransform)>,
-    buttons: Res<Input<MouseButton>>,
+    buttons: Res<ButtonInput<MouseButton>>,
     map: Res<BevyBattleMap>,
 ) {
     let window = windows.single();
@@ -127,9 +127,9 @@ fn hexagonal_plane(hex_layout: &HexLayout) -> Mesh {
         .facing(Vec3::Z)
         .with_scale(Vec3::splat(0.95))
         .build();
-    Mesh::new(PrimitiveTopology::TriangleList)
+    Mesh::new(PrimitiveTopology::TriangleList, RenderAssetUsages::default())
         .with_inserted_attribute(Mesh::ATTRIBUTE_POSITION, mesh_info.vertices)
         .with_inserted_attribute(Mesh::ATTRIBUTE_NORMAL, mesh_info.normals)
         .with_inserted_attribute(Mesh::ATTRIBUTE_UV_0, mesh_info.uvs)
-        .with_indices(Some(Indices::U16(mesh_info.indices)))
+        .with_inserted_indices(Indices::U16(mesh_info.indices))
 }

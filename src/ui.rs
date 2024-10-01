@@ -16,7 +16,7 @@ impl Ui {
                 border: UiRect::all(Val::Px(5.0)),
                 ..Default::default()
             },
-            border_color: BorderColor(Color::rgb(0.5, 0.5, 0.5)),
+            border_color: BorderColor(Color::srgb(0.5, 0.5, 0.5)),
             ..Default::default()
         })
         .with_children(|builder| {
@@ -26,7 +26,7 @@ impl Ui {
                     width: Val::Percent(100.0),
                     ..Default::default()
                 },
-                background_color: BackgroundColor(Color::rgb(1.0, 1.0, 1.0)),
+                background_color: BackgroundColor(Color::srgb(1.0, 1.0, 1.0)),
                 z_index: ZIndex::Global(1),
                 ..Default::default()
             });
