@@ -9,8 +9,6 @@ use bevy_pancam::{PanCamPlugin, PanCam};
 use hexx::*;
 
 mod battle_map;
-mod unit;
-mod ui;
 
 fn main() {
     App::new()
@@ -57,7 +55,6 @@ fn setup(
     }"#;
 
     let battle_map = battle_map::BattleMap::from_json(mapstr);
-//    let battle_map = battle_map::BattleMap::new((3,3));
     let layout = HexLayout { hex_size: Vec2::splat(10.0),  ..default()};
     let mesh = hexagonal_plane(&layout);
     let mesh_handle = meshes.add(mesh);
@@ -66,8 +63,6 @@ fn setup(
         Camera2dBundle::default(),
         GameCamera,
     )).insert(PanCam::default());
-
-    ui::Ui::setup_ui(&mut commands);
 
     let right: i32 = battle_map.size.0 as i32 / 2;
     let left = -right;
