@@ -40,7 +40,23 @@ fn setup(
     mut meshes: ResMut<Assets<Mesh>>,
     mut materials: ResMut<Assets<ColorMaterial>>    
 ) {
-    let battle_map = battle_map::BattleMap::new((3,3));
+    let mapstr =  r#"{
+        "size":[3,3],
+        "hexes":[
+            {"hex_type":"DeepWater"},
+            {"hex_type":"Plains"},
+            {"hex_type":"ShallowWater"},
+            {"hex_type":"Mountains"}, 
+            {"hex_type":"Hills"}, 
+            {"hex_type":"DeepWater"}, 
+            {"hex_type":"DeepWater"}, 
+            {"hex_type":"DeepWater"}, 
+            {"hex_type":"DeepWater"}
+        ]
+    }"#;
+
+    let battle_map = battle_map::BattleMap::from_json(mapstr);
+//    let battle_map = battle_map::BattleMap::new((3,3));
     let layout = HexLayout { hex_size: Vec2::splat(10.0),  ..default()};
     let mesh = hexagonal_plane(&layout);
     let mesh_handle = meshes.add(mesh);
