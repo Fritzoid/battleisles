@@ -6,6 +6,7 @@ use bevy::window::WindowMode;
 use bevy::render::mesh::Indices;
 use bevy::render::render_resource::PrimitiveTopology;
 use bevy_pancam::{PanCamPlugin, PanCam};
+use bevy_egui::{egui, EguiContexts, EguiPlugin};
 use hexx::*;
 
 mod battle_map;
@@ -20,8 +21,9 @@ fn main() {
             }),
             ..default()
         }),PanCamPlugin::default()))
+        .add_plugins(EguiPlugin)
         .add_systems(Startup, setup)
-        .add_systems(Update, handle_input)
+        .add_systems(Update, (handle_input,ui_system))
         .run();
 }
 
@@ -127,4 +129,42 @@ fn hexagonal_plane(hex_layout: &HexLayout) -> Mesh {
         .with_inserted_attribute(Mesh::ATTRIBUTE_NORMAL, mesh_info.normals)
         .with_inserted_attribute(Mesh::ATTRIBUTE_UV_0, mesh_info.uvs)
         .with_inserted_indices(Indices::U16(mesh_info.indices))
+}
+
+fn ui_system(mut contexts: EguiContexts) {
+    let ctx = contexts.ctx_mut();
+
+    // Top panel
+    egui::TopBottomPanel::top("top_panel")
+        .default_height(50.0)
+        .show(ctx, |ui| {
+            ui.add(egui::Label::new("Top Panel"));
+        });
+
+    // Bottom panel
+    egui::TopBottomPanel::bottom("bottom_panel")
+        .default_height(50.0)
+        .show(ctx, |ui| {
+            ui.add(egui::Label::new("Bottom Panel"));
+        });
+
+    // Left panel
+    egui::SidePanel::left("left_panel")
+        .default_width(100.0)
+        .show(ctx, |ui| {
+            ui.add(egui::Label::new("Left Panel"));
+        });
+
+    // Right panel
+    egui::SidePanel::right("right_panel")
+        .default_width(100.0)
+        .show(ctx, |ui| {
+            ui.add(egui::Label::new("Right Panel"));
+        });
+
+    // Set the background color of the panels to light blue
+    ctx.set_visuals(egui::Visuals {
+        panel_fill: egui::Color32::from_rgb(173, 216, 230),
+        ..Default::default()
+    });
 }
