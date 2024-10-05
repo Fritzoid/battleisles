@@ -1,11 +1,10 @@
 use std::collections::HashMap;
 use bevy::prelude::*; 
 use bevy::render::render_asset::RenderAssetUsages;
-use bevy::window::PrimaryWindow;
 use bevy::window::WindowMode;
 use bevy::render::mesh::Indices;
 use bevy::render::render_resource::PrimitiveTopology;
-use bevy_pancam::{PanCamPlugin, PanCam};
+use bevy_panorbit_camera::{PanOrbitCamera, PanOrbitCameraPlugin};
 use bevy_egui::{egui, EguiContexts, EguiPlugin};
 use hexx::*;
 
@@ -16,17 +15,18 @@ pub struct BattleIslesGame;
 impl BattleIslesGame {
     pub fn run() {
         App::new()
-            .add_plugins((DefaultPlugins.set(WindowPlugin {
+            .add_plugins(DefaultPlugins.set(WindowPlugin {
                 primary_window: Some(Window {
                     mode: WindowMode::BorderlessFullscreen,
                     canvas: Some("#bevy".to_owned()),
                     ..default()
                 }),
                 ..default()
-            }),PanCamPlugin::default()))
+            }))
+            .add_plugins(PanOrbitCameraPlugin)
             .add_plugins(EguiPlugin)
             .add_systems(Startup, setup)
-            .add_systems(Update, (handle_input,ui_system))
+            .add_systems(Update, ui_system)
             .run();
     }
 }
@@ -43,7 +43,7 @@ struct GameCamera;
 fn setup(
     mut commands: Commands,
     mut meshes: ResMut<Assets<Mesh>>,
-    mut materials: ResMut<Assets<ColorMaterial>>    
+    mut materials: ResMut<Assets<StandardMaterial>>    
 ) {
     let mapstr =  r#"{
         "size":[3,3],
@@ -61,14 +61,26 @@ fn setup(
     }"#;
 
     let battle_map = battle_map::BattleMap::from_json(mapstr);
-    let layout = HexLayout { hex_size: Vec2::splat(10.0),  ..default()};
+    let layout = HexLayout { hex_size: Vec2::splat(1.0),  ..default()};
     let mesh = hexagonal_plane(&layout);
     let mesh_handle = meshes.add(mesh);
 
     commands.spawn((
-        Camera2dBundle::default(),
+        Camera3dBundle {
+            transform: Transform::from_translation(Vec3::new(0.0, 10.0, 20.0)) // Set initial position
+                .looking_at(Vec3::ZERO, Vec3::Y), // Make the camera look at the origin
+            ..default()
+        },
         GameCamera,
-    )).insert(PanCam::default());
+        PanOrbitCamera {
+            focus: Vec3::new(0.0, 0.0, 0.0),
+            radius: Some(20.0),
+            orbit_sensitivity: 1.5,
+            pan_sensitivity: 0.5,
+            zoom_sensitivity: 0.5,
+            ..default()
+        },
+    ));
 
     let right: i32 = battle_map.size.0 as i32 / 2;
     let left = -right;
@@ -80,15 +92,15 @@ fn setup(
         .map(|(hex, battle_hex)| {
             let pos = layout.hex_to_world_pos(hex);
             let id = commands
-                .spawn(ColorMesh2dBundle {
-                    transform: Transform::from_xyz(pos.x, pos.y, 0.0),
+                .spawn(PbrBundle {
+                    transform: Transform::from_xyz(pos.x, 0.0, -pos.y),
                     mesh: mesh_handle.clone().into(),
                     material: match battle_hex.hex_type { 
-                        battle_map::HexType::DeepWater => materials.add(ColorMaterial::from_color(bevy::color::palettes::css::DARK_BLUE)),
-                        battle_map::HexType::ShallowWater => materials.add(ColorMaterial::from_color(bevy::color::palettes::css::BLUE)),
-                        battle_map::HexType::Plains => materials.add(ColorMaterial::from_color(bevy::color::palettes::css::GREEN)),
-                        battle_map::HexType::Mountains => materials.add(ColorMaterial::from_color(bevy::color::palettes::css::GRAY)),
-                        battle_map::HexType::Hills => materials.add(ColorMaterial::from_color(bevy::color::palettes::css::YELLOW)),
+                        battle_map::HexType::DeepWater => materials.add(StandardMaterial::from_color(bevy::color::palettes::css::DARK_BLUE)),
+                        battle_map::HexType::ShallowWater => materials.add(StandardMaterial::from_color(bevy::color::palettes::css::BLUE)),
+                        battle_map::HexType::Plains => materials.add(StandardMaterial::from_color(bevy::color::palettes::css::GREEN)),
+                        battle_map::HexType::Mountains => materials.add(StandardMaterial::from_color(bevy::color::palettes::css::GRAY)),
+                        battle_map::HexType::Hills => materials.add(StandardMaterial::from_color(bevy::color::palettes::css::YELLOW)),
                     },
                     ..default()
                 })
@@ -98,34 +110,13 @@ fn setup(
         .collect();
 
     commands.insert_resource(BevyBattleMap {
-        layout,
-        entities,
+        layout: layout,
+        entities: entities,
     });
 }
 
-fn handle_input(    windows: Query<&Window, With<PrimaryWindow>>,
-    cameras: Query<(&Camera, &GlobalTransform)>,
-    buttons: Res<ButtonInput<MouseButton>>,
-    map: Res<BevyBattleMap>,
-) {
-    let window = windows.single();
-    let (camera, cam_transform) = cameras.single();
-    if let Some(pos) = window
-        .cursor_position()
-        .and_then(|p| camera.viewport_to_world_2d(cam_transform, p))
-    {
-        if buttons.just_pressed(MouseButton::Left) {
-            let coord = map.layout.world_pos_to_hex(pos);
-            if let Some(entity) = map.entities.get(&coord).copied() {
-                dbg!(entity);
-            }
-        }
-    }
-}
-
 fn hexagonal_plane(hex_layout: &HexLayout) -> Mesh {
-    let mesh_info = PlaneMeshBuilder::new(hex_layout)
-        .facing(Vec3::Z)
+    let mesh_info = ColumnMeshBuilder::new(hex_layout, 0.2)
         .with_scale(Vec3::splat(0.95))
         .build();
     Mesh::new(PrimitiveTopology::TriangleList, RenderAssetUsages::default())
