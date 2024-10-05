@@ -6,6 +6,7 @@ use bevy::render::mesh::Indices;
 use bevy::render::render_resource::PrimitiveTopology;
 use bevy_panorbit_camera::{PanOrbitCamera, PanOrbitCameraPlugin};
 use bevy_egui::{egui, EguiContexts, EguiPlugin};
+use bevy_mod_raycast::prelude::*;
 use hexx::*;
 
 mod battle_map;
@@ -25,8 +26,9 @@ impl BattleIslesGame {
             }))
             .add_plugins(PanOrbitCameraPlugin)
             .add_plugins(EguiPlugin)
+            .add_plugins(CursorRayPlugin)
             .add_systems(Startup, setup)
-            .add_systems(Update, ui_system)
+            .add_systems(Update, (ui_system,raycast))
             .run();
     }
 }
@@ -110,8 +112,8 @@ fn setup(
         .collect();
 
     commands.insert_resource(BevyBattleMap {
-        layout: layout,
-        entities: entities,
+        layout,
+        entities,
     });
 }
 
@@ -162,4 +164,20 @@ fn ui_system(mut contexts: EguiContexts) {
         panel_fill: egui::Color32::from_rgb(173, 216, 230),
         ..Default::default()
     });
+}
+
+fn raycast(
+    mut commands: Commands,
+    mut materials: ResMut<Assets<StandardMaterial>>,
+    cursor_ray: Res<CursorRay>, 
+    mut raycast: Raycast, 
+    mut gizmos: Gizmos) {
+
+    if let Some(cursor_ray) = **cursor_ray {
+        let hits = raycast.debug_cast_ray(cursor_ray, &default(), &mut gizmos);
+        if let Some(hit) = hits.first() {
+            let new_material = materials.add(StandardMaterial::from_color(bevy::color::palettes::css::PINK));
+            commands.entity(hit.0).insert(new_material);
+        }
+    }
 }
