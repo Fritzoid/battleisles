@@ -1,13 +1,13 @@
-use std::collections::HashMap;
-use bevy::prelude::*; 
-use bevy::render::render_asset::RenderAssetUsages;
-use bevy::window::WindowMode;
+use bevy::prelude::*;
 use bevy::render::mesh::Indices;
+use bevy::render::render_asset::RenderAssetUsages;
 use bevy::render::render_resource::PrimitiveTopology;
-use bevy_panorbit_camera::{PanOrbitCamera, PanOrbitCameraPlugin};
+use bevy::window::WindowMode;
 use bevy_egui::{egui, EguiContexts, EguiPlugin};
 use bevy_mod_raycast::prelude::*;
+use bevy_panorbit_camera::{PanOrbitCamera, PanOrbitCameraPlugin};
 use hexx::*;
+use std::collections::HashMap;
 
 mod battle_map;
 
@@ -28,7 +28,7 @@ impl BattleIslesGame {
             .add_plugins(EguiPlugin)
             .add_plugins(CursorRayPlugin)
             .add_systems(Startup, setup)
-            .add_systems(Update, (ui_system,raycast))
+            .add_systems(Update, (ui_system, raycast))
             .run();
     }
 }
@@ -45,9 +45,9 @@ struct GameCamera;
 fn setup(
     mut commands: Commands,
     mut meshes: ResMut<Assets<Mesh>>,
-    mut materials: ResMut<Assets<StandardMaterial>>    
+    mut materials: ResMut<Assets<StandardMaterial>>,
 ) {
-    let mapstr =  r#"{
+    let mapstr = r#"{
         "size":[3,3],
         "hexes":[
             {"hex_type":"DeepWater"},
@@ -63,7 +63,10 @@ fn setup(
     }"#;
 
     let battle_map = battle_map::BattleMap::from_json(mapstr);
-    let layout = HexLayout { hex_size: Vec2::splat(1.0),  ..default()};
+    let layout = HexLayout {
+        hex_size: Vec2::splat(1.0),
+        ..default()
+    };
     let mesh = hexagonal_plane(&layout);
     let mesh_handle = meshes.add(mesh);
 
@@ -97,12 +100,22 @@ fn setup(
                 .spawn(PbrBundle {
                     transform: Transform::from_xyz(pos.x, 0.0, -pos.y),
                     mesh: mesh_handle.clone().into(),
-                    material: match battle_hex.hex_type { 
-                        battle_map::HexType::DeepWater => materials.add(StandardMaterial::from_color(bevy::color::palettes::css::DARK_BLUE)),
-                        battle_map::HexType::ShallowWater => materials.add(StandardMaterial::from_color(bevy::color::palettes::css::BLUE)),
-                        battle_map::HexType::Plains => materials.add(StandardMaterial::from_color(bevy::color::palettes::css::GREEN)),
-                        battle_map::HexType::Mountains => materials.add(StandardMaterial::from_color(bevy::color::palettes::css::GRAY)),
-                        battle_map::HexType::Hills => materials.add(StandardMaterial::from_color(bevy::color::palettes::css::YELLOW)),
+                    material: match battle_hex.hex_type {
+                        battle_map::HexType::DeepWater => materials.add(
+                            StandardMaterial::from_color(bevy::color::palettes::css::DARK_BLUE),
+                        ),
+                        battle_map::HexType::ShallowWater => materials.add(
+                            StandardMaterial::from_color(bevy::color::palettes::css::BLUE),
+                        ),
+                        battle_map::HexType::Plains => materials.add(StandardMaterial::from_color(
+                            bevy::color::palettes::css::GREEN,
+                        )),
+                        battle_map::HexType::Mountains => materials.add(
+                            StandardMaterial::from_color(bevy::color::palettes::css::GRAY),
+                        ),
+                        battle_map::HexType::Hills => materials.add(StandardMaterial::from_color(
+                            bevy::color::palettes::css::YELLOW,
+                        )),
                     },
                     ..default()
                 })
@@ -111,21 +124,21 @@ fn setup(
         })
         .collect();
 
-    commands.insert_resource(BevyBattleMap {
-        layout,
-        entities,
-    });
+    commands.insert_resource(BevyBattleMap { layout, entities });
 }
 
 fn hexagonal_plane(hex_layout: &HexLayout) -> Mesh {
     let mesh_info = ColumnMeshBuilder::new(hex_layout, 0.2)
         .with_scale(Vec3::splat(0.95))
         .build();
-    Mesh::new(PrimitiveTopology::TriangleList, RenderAssetUsages::default())
-        .with_inserted_attribute(Mesh::ATTRIBUTE_POSITION, mesh_info.vertices)
-        .with_inserted_attribute(Mesh::ATTRIBUTE_NORMAL, mesh_info.normals)
-        .with_inserted_attribute(Mesh::ATTRIBUTE_UV_0, mesh_info.uvs)
-        .with_inserted_indices(Indices::U16(mesh_info.indices))
+    Mesh::new(
+        PrimitiveTopology::TriangleList,
+        RenderAssetUsages::default(),
+    )
+    .with_inserted_attribute(Mesh::ATTRIBUTE_POSITION, mesh_info.vertices)
+    .with_inserted_attribute(Mesh::ATTRIBUTE_NORMAL, mesh_info.normals)
+    .with_inserted_attribute(Mesh::ATTRIBUTE_UV_0, mesh_info.uvs)
+    .with_inserted_indices(Indices::U16(mesh_info.indices))
 }
 
 fn ui_system(mut contexts: EguiContexts) {
@@ -169,14 +182,16 @@ fn ui_system(mut contexts: EguiContexts) {
 fn raycast(
     mut commands: Commands,
     mut materials: ResMut<Assets<StandardMaterial>>,
-    cursor_ray: Res<CursorRay>, 
-    mut raycast: Raycast, 
-    mut gizmos: Gizmos) {
-
+    cursor_ray: Res<CursorRay>,
+    mut raycast: Raycast,
+    mut gizmos: Gizmos,
+) {
     if let Some(cursor_ray) = **cursor_ray {
         let hits = raycast.debug_cast_ray(cursor_ray, &default(), &mut gizmos);
         if let Some(hit) = hits.first() {
-            let new_material = materials.add(StandardMaterial::from_color(bevy::color::palettes::css::PINK));
+            let new_material = materials.add(StandardMaterial::from_color(
+                bevy::color::palettes::css::PINK,
+            ));
             commands.entity(hit.0).insert(new_material);
         }
     }
