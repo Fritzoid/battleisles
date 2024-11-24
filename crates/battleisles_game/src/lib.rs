@@ -18,7 +18,7 @@ impl BattleIslesGame {
         App::new()
             .add_plugins(DefaultPlugins.set(WindowPlugin {
                 primary_window: Some(Window {
-                    mode: WindowMode::BorderlessFullscreen,
+                    mode: WindowMode::Windowed,
                     canvas: Some("#bevy".to_owned()),
                     ..default()
                 }),
