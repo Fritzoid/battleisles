@@ -15,15 +15,15 @@ pub struct BattleHex {
 }
 
 #[derive(Serialize, Deserialize, Debug)]
-pub struct BattleMap {
+pub struct Map {
     pub size: (u16, u16),
     pub hexes: Vec<BattleHex>,
 }
 
-impl BattleMap {
-    pub fn from_json(input: &str) -> BattleMap {
+impl Map {
+    pub fn from_json(input: &str) -> Map {
         match serde_json::from_str(input) {
-            Ok(battle_map) => battle_map,
+            Ok(map) => map,
             Err(e) => panic!("Failed to deserialize battle map: {}", e),
         }
     }
@@ -55,7 +55,7 @@ mod tests {
                 {"hex_type":"DeepWater"}
             ]
         }"#;
-        let map = BattleMap::from_json(mapstr);
+        let map = Map::from_json(mapstr);
         assert_eq!(map.size, (3, 3));
         assert_eq!(map.hexes.len(), 9);
         assert_eq!(map.hexes[0].hex_type, HexType::DeepWater);

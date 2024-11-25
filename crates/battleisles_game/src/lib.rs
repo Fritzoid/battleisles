@@ -3,13 +3,14 @@ use bevy::render::mesh::Indices;
 use bevy::render::render_asset::RenderAssetUsages;
 use bevy::render::render_resource::PrimitiveTopology;
 use bevy::window::WindowMode;
-use bevy_egui::{egui, EguiContexts, EguiPlugin};
+use bevy_egui::EguiPlugin;
 use bevy_mod_raycast::prelude::*;
 use bevy_panorbit_camera::{PanOrbitCamera, PanOrbitCameraPlugin};
 use hexx::*;
 use std::collections::HashMap;
 
-mod battle_map;
+mod map;
+mod ui;
 
 pub struct BattleIslesGame;
 
@@ -28,7 +29,7 @@ impl BattleIslesGame {
             .add_plugins(EguiPlugin)
             .add_plugins(CursorRayPlugin)
             .add_systems(Startup, setup)
-            .add_systems(Update, (ui_system, raycast))
+            .add_systems(Update, ui::ui_system)
             .run();
     }
 }
@@ -62,7 +63,7 @@ fn setup(
         ]
     }"#;
 
-    let battle_map = battle_map::BattleMap::from_json(mapstr);
+    let battle_map = map::Map::from_json(mapstr);
     let layout = HexLayout {
         hex_size: Vec2::splat(1.0),
         ..default()
@@ -101,19 +102,19 @@ fn setup(
                     transform: Transform::from_xyz(pos.x, 0.0, -pos.y),
                     mesh: mesh_handle.clone().into(),
                     material: match battle_hex.hex_type {
-                        battle_map::HexType::DeepWater => materials.add(
+                        map::HexType::DeepWater => materials.add(
                             StandardMaterial::from_color(bevy::color::palettes::css::DARK_BLUE),
                         ),
-                        battle_map::HexType::ShallowWater => materials.add(
+                        map::HexType::ShallowWater => materials.add(
                             StandardMaterial::from_color(bevy::color::palettes::css::BLUE),
                         ),
-                        battle_map::HexType::Plains => materials.add(StandardMaterial::from_color(
+                        map::HexType::Plains => materials.add(StandardMaterial::from_color(
                             bevy::color::palettes::css::GREEN,
                         )),
-                        battle_map::HexType::Mountains => materials.add(
+                        map::HexType::Mountains => materials.add(
                             StandardMaterial::from_color(bevy::color::palettes::css::GRAY),
                         ),
-                        battle_map::HexType::Hills => materials.add(StandardMaterial::from_color(
+                        map::HexType::Hills => materials.add(StandardMaterial::from_color(
                             bevy::color::palettes::css::YELLOW,
                         )),
                     },
@@ -131,6 +132,11 @@ fn hexagonal_plane(hex_layout: &HexLayout) -> Mesh {
     let mesh_info = ColumnMeshBuilder::new(hex_layout, 0.2)
         .with_scale(Vec3::splat(0.95))
         .build();
+
+    let num_vertices = mesh_info.vertices.len();    
+    dbg!("Num vertices: {}", num_vertices);
+    dbg!("Vertices: {:?}", &mesh_info.vertices);
+
     Mesh::new(
         PrimitiveTopology::TriangleList,
         RenderAssetUsages::default(),
@@ -141,44 +147,7 @@ fn hexagonal_plane(hex_layout: &HexLayout) -> Mesh {
     .with_inserted_indices(Indices::U16(mesh_info.indices))
 }
 
-fn ui_system(mut contexts: EguiContexts) {
-    let ctx = contexts.ctx_mut();
-
-    // Top panel
-    egui::TopBottomPanel::top("top_panel")
-        .default_height(50.0)
-        .show(ctx, |ui| {
-            ui.add(egui::Label::new("Top Panel"));
-        });
-
-    // Bottom panel
-    egui::TopBottomPanel::bottom("bottom_panel")
-        .default_height(50.0)
-        .show(ctx, |ui| {
-            ui.add(egui::Label::new("Bottom Panel"));
-        });
-
-    // Left panel
-    egui::SidePanel::left("left_panel")
-        .default_width(100.0)
-        .show(ctx, |ui| {
-            ui.add(egui::Label::new("Left Panel"));
-        });
-
-    // Right panel
-    egui::SidePanel::right("right_panel")
-        .default_width(100.0)
-        .show(ctx, |ui| {
-            ui.add(egui::Label::new("Right Panel"));
-        });
-
-    // Set the background color of the panels to light blue
-    ctx.set_visuals(egui::Visuals {
-        panel_fill: egui::Color32::from_rgb(173, 216, 230),
-        ..Default::default()
-    });
-}
-
+/*
 fn raycast(
     mut commands: Commands,
     mut materials: ResMut<Assets<StandardMaterial>>,
@@ -196,3 +165,4 @@ fn raycast(
         }
     }
 }
+*/
