@@ -7,10 +7,13 @@ use bevy_egui::EguiPlugin;
 use bevy_mod_raycast::prelude::*;
 use bevy_panorbit_camera::{PanOrbitCamera, PanOrbitCameraPlugin};
 use hexx::*;
-use std::collections::HashMap;
+use std::{collections::HashMap};
 
 mod map;
 mod ui;
+mod center_marker;
+
+use center_marker::center_marker;
 
 pub struct BattleIslesGame;
 
@@ -42,6 +45,68 @@ struct BevyBattleMap {
 
 #[derive(Component)]
 struct GameCamera;
+
+fn setup(
+    mut commands: Commands,
+    mut meshes: ResMut<Assets<Mesh>>,
+    mut materials: ResMut<Assets<StandardMaterial>>,
+) {
+    let shape = RegularPolygon::new(5.0, 6);
+    let mesh = Extrusion::new(shape, 0.01);
+    let mesh_handle = meshes.add(mesh);
+
+    commands.spawn(PbrBundle {
+        mesh: mesh_handle.clone(),
+        material: materials.add(Color::WHITE),
+        transform: Transform { 
+            translation: Vec3::new(0.0, 0.0, 0.0),
+            rotation: Quat::from_rotation_x(-std::f32::consts::FRAC_PI_2) * Quat::from_rotation_z(std::f32::consts::FRAC_PI_2/3.0),
+            ..default()
+        },
+        ..default()
+    });
+
+    commands.spawn(PbrBundle {
+        mesh: mesh_handle.clone(),
+        material: materials.add(StandardMaterial::from_color(bevy::color::palettes::css::BLUE)),
+        transform: Transform { 
+            translation: Vec3::new(3.0/2.0 * 5.0, 0.0, (3.0f32).sqrt()/2.0 * 5.0),
+            rotation: Quat::from_rotation_x(-std::f32::consts::FRAC_PI_2) * Quat::from_rotation_z(std::f32::consts::FRAC_PI_2/3.0),
+            ..default()
+        },
+        ..default()
+    });
+
+    center_marker(&mut commands, &mut meshes, &mut materials);
+
+    commands.spawn(PointLightBundle {
+        point_light: PointLight {
+            shadows_enabled: true,
+            ..default()
+        },
+        transform: Transform::from_xyz(4.0, 8.0, 4.0),
+        ..default()
+    });
+
+    commands.spawn((
+        Camera3dBundle {
+            transform: Transform::from_translation(Vec3::new(0.0, 10.0, 20.0)) // Set initial position
+                .looking_at(Vec3::ZERO, Vec3::Y), // Make the camera look at the origin
+            ..default()
+        },
+        GameCamera,
+        PanOrbitCamera {
+            focus: Vec3::new(0.0, 0.0, 0.0),
+            radius: Some(10.0),
+            pitch_lower_limit: Some(0.1),
+            pitch_upper_limit: Some(std::f32::consts::FRAC_PI_2),
+            ..default()
+        },
+    ));
+
+}
+
+/*
 
 fn setup(
     mut commands: Commands,
@@ -147,7 +212,6 @@ fn hexagonal_plane(hex_layout: &HexLayout) -> Mesh {
     .with_inserted_indices(Indices::U16(mesh_info.indices))
 }
 
-/*
 fn raycast(
     mut commands: Commands,
     mut materials: ResMut<Assets<StandardMaterial>>,
