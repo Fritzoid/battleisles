@@ -55,22 +55,43 @@ fn setup(
     let mesh = Extrusion::new(shape, 0.01);
     let mesh_handle = meshes.add(mesh);
 
+    let mut x: f32 = 0.0;
+    let mut y: f32 = 0.0;
+    let mut z: f32 = 0.0;
+
     commands.spawn(PbrBundle {
         mesh: mesh_handle.clone(),
         material: materials.add(Color::WHITE),
         transform: Transform { 
-            translation: Vec3::new(0.0, 0.0, 0.0),
+            translation: Vec3::new(x, y, z),
             rotation: Quat::from_rotation_x(-std::f32::consts::FRAC_PI_2) * Quat::from_rotation_z(std::f32::consts::FRAC_PI_2/3.0),
             ..default()
         },
         ..default()
     });
 
+    x += 3.0/2.0 * 5.0;
+    z += (3.0f32).sqrt()/2.0 * 5.0;
+
     commands.spawn(PbrBundle {
         mesh: mesh_handle.clone(),
         material: materials.add(StandardMaterial::from_color(bevy::color::palettes::css::BLUE)),
         transform: Transform { 
-            translation: Vec3::new(3.0/2.0 * 5.0, 0.0, (3.0f32).sqrt()/2.0 * 5.0),
+            translation: Vec3::new(x, y, z),
+            rotation: Quat::from_rotation_x(-std::f32::consts::FRAC_PI_2) * Quat::from_rotation_z(std::f32::consts::FRAC_PI_2/3.0),
+            ..default()
+        },
+        ..default()
+    });
+
+    x += 3.0/2.0 * 5.0;
+    z += -((3.0f32).sqrt()/2.0 * 5.0);
+
+    commands.spawn(PbrBundle {
+        mesh: mesh_handle.clone(),
+        material: materials.add(StandardMaterial::from_color(bevy::color::palettes::css::RED)),
+        transform: Transform { 
+            translation: Vec3::new(x, y, z),
             rotation: Quat::from_rotation_x(-std::f32::consts::FRAC_PI_2) * Quat::from_rotation_z(std::f32::consts::FRAC_PI_2/3.0),
             ..default()
         },
