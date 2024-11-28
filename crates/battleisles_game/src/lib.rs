@@ -6,7 +6,6 @@ use bevy::window::WindowMode;
 use bevy_egui::EguiPlugin;
 use bevy_mod_raycast::prelude::*;
 use bevy_panorbit_camera::{PanOrbitCamera, PanOrbitCameraPlugin};
-use hexx::*;
 use std::{collections::HashMap};
 
 mod map;
@@ -35,12 +34,6 @@ impl BattleIslesGame {
             .add_systems(Update, ui::ui_system)
             .run();
     }
-}
-
-#[derive(Resource)]
-struct BevyBattleMap {
-    layout: HexLayout,
-    entities: HashMap<Hex, Entity>,
 }
 
 #[derive(Component)]
@@ -156,23 +149,6 @@ fn setup(
     };
     let mesh = hexagonal_plane(&layout);
     let mesh_handle = meshes.add(mesh);
-
-    commands.spawn((
-        Camera3dBundle {
-            transform: Transform::from_translation(Vec3::new(0.0, 10.0, 20.0)) // Set initial position
-                .looking_at(Vec3::ZERO, Vec3::Y), // Make the camera look at the origin
-            ..default()
-        },
-        GameCamera,
-        PanOrbitCamera {
-            focus: Vec3::new(0.0, 0.0, 0.0),
-            radius: Some(20.0),
-            orbit_sensitivity: 1.5,
-            pan_sensitivity: 0.5,
-            zoom_sensitivity: 0.5,
-            ..default()
-        },
-    ));
 
     let right: i32 = battle_map.size.0 as i32 / 2;
     let left = -right;
