@@ -1,13 +1,8 @@
 use bevy::prelude::*;
-use serde::{Deserialize, Serialize};
 
-#[derive(Component, Serialize, Deserialize)]
-pub struct HexPosition {
-    pub x: i32,
-    pub y: i32,
-}
+const HEX_SIZE: f32 = 5.0;
+const HEX_THICKNESS: f32 = 0.01;
 
-#[derive(Component, Serialize, Deserialize, PartialEq, Debug)]
 pub enum HexType {
     DeepWater,
     ShallowWater,
@@ -16,86 +11,54 @@ pub enum HexType {
     Mountains,
 }
 
-#[derive(Bundle, Serialize, Deserialize)]
-pub struct Hex {
-    pub position: HexPosition,
-    pub hex_type: HexType,
-    #[serde(skip)]
-    pub pbr_bundle: PbrBundle,
-}
-
-#[derive(Component, Serialize, Deserialize)]
-pub struct MapSize {
+pub struct MapInfo {
     pub width: u16,
     pub height: u16,
+    pub hexes: Vec<HexType>,
 }
 
-#[derive(Component, Serialize, Deserialize)]
-pub struct Hexes {
-    pub hexes: Vec<Hex>,
-}
+pub fn init_map(
+    map: MapInfo, 
+    meshes: &mut Assets<Mesh>, 
+    commands: &mut Commands, 
+    materials: &mut Assets<StandardMaterial>) {
 
-#[derive(Bundle, Serialize, Deserialize)]
-pub struct Map {
-    pub size: MapSize,
-    pub hexes: Hexes,
-}
+    let shape = RegularPolygon::new(HEX_SIZE, 6);
+    let mesh = Extrusion::new(shape, HEX_THICKNESS);
+    let mesh_handle = meshes.add(mesh);
+    let deep_water_mat = materials.add(StandardMaterial::from_color(bevy::color::palettes::css::DARK_BLUE));
+    let shallow_water_mat = materials.add(StandardMaterial::from_color(bevy::color::palettes::css::BLUE));
+    let plains_mat = materials.add(StandardMaterial::from_color(bevy::color::palettes::css::GREEN));
+    let mountains_mat = materials.add(StandardMaterial::from_color(bevy::color::palettes::css::GRAY));
+    let hills_mat = materials.add(StandardMaterial::from_color(bevy::color::palettes::css::YELLOW));
+    
+    let mut x: f32 = 0.0;
+    let mut z: f32 = 0.0;
+    let mut i: usize = 0;
 
-impl Map {
-    pub fn new(size: (u16, u16), hexes: Vec<Hex>) -> Map {
-        Map {
-            size: MapSize {
-                width: size.0,
-                height: size.1,
-            },
-            hexes: Hexes { hexes },
+    for h in 1..=map.height {
+        x = 0.0;
+        for w in 1..=map.width {
+            commands.spawn( PbrBundle {
+                mesh: mesh_handle.clone(),
+                material: match map.hexes[i] {
+                    HexType::DeepWater => deep_water_mat.clone(),
+                    HexType::ShallowWater => shallow_water_mat.clone(),
+                    HexType::Plains => plains_mat.clone(),
+                    HexType::Mountains => mountains_mat.clone(),
+                    HexType::Hills => hills_mat.clone(),
+                },
+                transform: Transform { 
+                    translation: Vec3::new(x, 0.0, z),
+                    rotation: Quat::from_rotation_x(-std::f32::consts::FRAC_PI_2) * Quat::from_rotation_z(std::f32::consts::FRAC_PI_2/3.0),
+                    ..default()
+                },
+                ..default()
+            });
+            i += 1;
+            x += 3.0/2.0 * HEX_SIZE;
+            z += ((3.0f32).sqrt()/2.0 * HEX_SIZE) * if w % 2 == 0 { -1.0 } else { 1.0 };
         }
-    }
-
-    pub fn from_json(input: &str) -> Map {
-        match serde_json::from_str(input) {
-            Ok(map) => map,
-            Err(e) => panic!("Failed to deserialize map: {}", e),
-        }
-    }
-}
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn from_json_test() {
-
-        let mapstr = r#"{
-            "size": {"width":3,"height":3},
-            "hexes": {
-                "hexes":[
-                    {"position":{"x":0,"y":0},"hex_type":"DeepWater"},
-                    {"position":{"x":0,"y":1},"hex_type":"Plains"},
-                    {"position":{"x":0,"y":2},"hex_type":"ShallowWater"},
-                    {"position":{"x":1,"y":0},"hex_type":"Mountains"},
-                    {"position":{"x":1,"y":1},"hex_type":"Hills"},
-                    {"position":{"x":1,"y":2},"hex_type":"DeepWater"},
-                    {"position":{"x":2,"y":0},"hex_type":"DeepWater"},
-                    {"position":{"x":2,"y":1},"hex_type":"DeepWater"},
-                    {"position":{"x":2,"y":2},"hex_type":"DeepWater"}
-                ]
-            }
-        }"#;
-
-        let map = Map::from_json(mapstr);
-        assert_eq!(map.size.width, 3);
-        assert_eq!(map.size.height, 3);
-        assert_eq!(map.hexes.hexes.len(), 9);
-        assert_eq!(map.hexes.hexes[0].position.x, 0);
-        assert_eq!(map.hexes.hexes[0].position.y, 0);
-        assert_eq!(map.hexes.hexes[0].hex_type, HexType::DeepWater);
-        assert_eq!(map.hexes.hexes[1].position.x, 0);
-        assert_eq!(map.hexes.hexes[1].position.y, 1);
-        assert_eq!(map.hexes.hexes[1].hex_type, HexType::Plains);
-        assert_eq!(map.hexes.hexes[2].position.x, 0);
-        assert_eq!(map.hexes.hexes[2].position.y, 2);
-        assert_eq!(map.hexes.hexes[2].hex_type, HexType::ShallowWater);
+        z = h as f32 * HEX_SIZE * 3.0f32.sqrt();
     }
 }
