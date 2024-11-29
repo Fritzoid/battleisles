@@ -5,14 +5,14 @@ use bevy_mod_raycast::prelude::*;
 use bevy_panorbit_camera::PanOrbitCameraPlugin;
 use map::init_map;
 
-mod ui;
 mod center_marker;
-mod map;
 mod env;
+mod map;
+mod ui;
 
 use center_marker::center_marker;
-use map::{MapInfo,HexType};
 use env::init_env;
+use map::{HexType, MapInfo};
 
 pub struct BattleIslesGame;
 
@@ -42,7 +42,7 @@ fn setup(
     mut materials: ResMut<Assets<StandardMaterial>>,
 ) {
     let map = MapInfo {
-        width: 3,
+        width: 5,
         height: 3,
         hexes: vec![
             HexType::DeepWater,
@@ -54,6 +54,12 @@ fn setup(
             HexType::DeepWater,
             HexType::DeepWater,
             HexType::DeepWater,
+            HexType::Hills,
+            HexType::ShallowWater,
+            HexType::ShallowWater,
+            HexType::Plains,
+            HexType::Plains,
+            HexType::Mountains,
         ],
     };
 
@@ -61,4 +67,3 @@ fn setup(
     init_map(map, &mut meshes, &mut commands, &mut materials);
     init_env(&mut commands);
 }
-
