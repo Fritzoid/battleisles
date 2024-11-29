@@ -32,7 +32,7 @@ pub fn init_map(
     let mountains_mat = materials.add(StandardMaterial::from_color(bevy::color::palettes::css::GRAY));
     let hills_mat = materials.add(StandardMaterial::from_color(bevy::color::palettes::css::YELLOW));
     
-    let mut x: f32 = 0.0;
+    let mut x: f32;
     let mut z: f32 = 0.0;
     let mut i: usize = 0;
 
