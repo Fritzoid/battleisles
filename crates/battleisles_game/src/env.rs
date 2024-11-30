@@ -33,7 +33,6 @@ pub fn init_env(commands: &mut Commands, asset_server: &Res<AssetServer>) {
             ..default()
         },
     ))
-/* 
     .insert(EnvironmentMapLight {
         diffuse_map: asset_server.load("environment_maps/pisa_diffuse_rgb9e5_zstd.ktx2"),
         specular_map: asset_server.load("environment_maps/pisa_specular_rgb9e5_zstd.ktx2"),
@@ -43,7 +42,6 @@ pub fn init_env(commands: &mut Commands, asset_server: &Res<AssetServer>) {
         image: asset_server.load("environment_maps/pisa_specular_rgb9e5_zstd.ktx2"),
         brightness: 5000.0,
     })
- */
     .insert(ScreenSpaceReflectionsBundle::default())
     .insert(ScreenSpaceReflectionsSettings::default())
     .insert(Fxaa::default());
