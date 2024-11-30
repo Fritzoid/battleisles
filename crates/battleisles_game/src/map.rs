@@ -1,7 +1,18 @@
 use bevy::prelude::*;
+use bevy::pbr::ExtendedMaterial;
+use bevy::render::texture::ImageLoaderSettings;
+use bevy::render::texture::ImageSampler;
+use bevy::render::texture::ImageSamplerDescriptor;
+use bevy::render::texture::ImageAddressMode;
+use bevy::render::texture::ImageFilterMode;
+use bevy::math::vec4;
+use crate::Water;
+use crate::WaterSettings;
 
 const HEX_SIZE: f32 = 5.0;
 const HEX_THICKNESS: f32 = 0.01;
+
+#[derive(PartialEq)]
 pub enum HexType {
     DeepWater,
     ShallowWater,
@@ -21,6 +32,8 @@ pub fn init_map(
     meshes: &mut Assets<Mesh>,
     commands: &mut Commands,
     materials: &mut Assets<StandardMaterial>,
+    water_materials: &mut Assets<ExtendedMaterial<StandardMaterial, Water>>,
+    asset_server: &Res<AssetServer>,
 ) {
     let shape = RegularPolygon::new(HEX_SIZE, 6);
     let mesh = Extrusion::new(shape, HEX_THICKNESS);
@@ -41,6 +54,39 @@ pub fn init_map(
         bevy::color::palettes::css::YELLOW,
     ));
 
+    let fancy_water = water_materials.add(ExtendedMaterial {
+        base: StandardMaterial {
+            base_color: bevy::color::palettes::css::BLACK.into(),
+            perceptual_roughness: 0.0,
+            ..default()
+        },
+        extension: Water {
+            normals: asset_server.load_with_settings::<Image, ImageLoaderSettings>(
+                "textures/water_normals.png",
+                |settings| {
+                    settings.is_srgb = false;
+                    settings.sampler = ImageSampler::Descriptor(ImageSamplerDescriptor {
+                        address_mode_u: ImageAddressMode::Repeat,
+                        address_mode_v: ImageAddressMode::Repeat,
+                        mag_filter: ImageFilterMode::Linear,
+                        min_filter: ImageFilterMode::Linear,
+                        ..default()
+                    });
+                },
+            ),
+            // These water settings are just random values to create some
+            // variety.
+            settings: WaterSettings {
+                octave_vectors: [
+                    vec4(0.080, 0.059, 0.073, -0.062),
+                    vec4(0.153, 0.138, -0.149, -0.195),
+                ],
+                octave_scales: vec4(1.0, 2.1, 7.9, 14.9) * 5.0,
+                octave_strengths: vec4(0.16, 0.18, 0.093, 0.044),
+            },
+        },
+    });
+
     let mut x: f32;
     let mut z: f32 = 0.0;
     let mut i: usize = 0;
@@ -48,23 +94,40 @@ pub fn init_map(
     for h in 1..=map.height {
         x = 0.0;
         for w in 1..=map.width {
-            commands.spawn(PbrBundle {
-                mesh: mesh_handle.clone(),
-                material: match map.hexes[i] {
-                    HexType::DeepWater => deep_water_mat.clone(),
-                    HexType::ShallowWater => shallow_water_mat.clone(),
-                    HexType::Plains => plains_mat.clone(),
-                    HexType::Mountains => mountains_mat.clone(),
-                    HexType::Hills => hills_mat.clone(),
-                },
-                transform: Transform {
-                    translation: Vec3::new(x, 0.0, z),
-                    rotation: Quat::from_rotation_x(-std::f32::consts::FRAC_PI_2)
-                        * Quat::from_rotation_z(std::f32::consts::FRAC_PI_2 / 3.0),
+
+            if map.hexes[i] == HexType::DeepWater {
+                commands.spawn(MaterialMeshBundle {
+                    mesh: mesh_handle.clone(),
+                    material: fancy_water.clone(),
+                    transform: Transform {
+                        translation: Vec3::new(x, 0.0, z),
+                        rotation: Quat::from_rotation_x(-std::f32::consts::FRAC_PI_2)
+                            * Quat::from_rotation_z(std::f32::consts::FRAC_PI_2 / 3.0),
+                        ..default()
+                    },
                     ..default()
-                },
-                ..default()
-            });
+                });
+            }
+            else {
+                commands.spawn(PbrBundle {
+                    mesh: mesh_handle.clone(),
+                    material: match map.hexes[i] {
+                        HexType::DeepWater => deep_water_mat.clone(),
+                        HexType::ShallowWater => shallow_water_mat.clone(),
+                        HexType::Plains => plains_mat.clone(),
+                        HexType::Mountains => mountains_mat.clone(),
+                        HexType::Hills => hills_mat.clone(),
+                    },
+                    transform: Transform {
+                        translation: Vec3::new(x, 0.0, z),
+                        rotation: Quat::from_rotation_x(-std::f32::consts::FRAC_PI_2)
+                            * Quat::from_rotation_z(std::f32::consts::FRAC_PI_2 / 3.0),
+                        ..default()
+                    },
+                    ..default()
+                });
+            }
+
             i += 1;
             x += 3.0 / 2.0 * HEX_SIZE;
             z += ((3.0f32).sqrt() / 2.0 * HEX_SIZE) * if w % 2 == 0 { -1.0 } else { 1.0 };
