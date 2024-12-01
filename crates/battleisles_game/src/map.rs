@@ -6,8 +6,8 @@ use bevy::render::texture::ImageSamplerDescriptor;
 use bevy::render::texture::ImageAddressMode;
 use bevy::render::texture::ImageFilterMode;
 use bevy::math::vec4;
-use crate::Water;
-use crate::WaterSettings;
+use crate::water::Water;
+use crate::water::WaterSettings;
 
 const HEX_SIZE: f32 = 5.0;
 const HEX_THICKNESS: f32 = 0.01;

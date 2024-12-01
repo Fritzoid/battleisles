@@ -1,7 +1,7 @@
 use bevy::pbr::NotShadowCaster;
 use bevy::prelude::*;
 
-pub(crate) fn center_marker(
+pub(crate) fn center(
     commands: &mut Commands<'_, '_>,
     meshes: &mut ResMut<'_, Assets<Mesh>>,
     materials: &mut ResMut<'_, Assets<StandardMaterial>>,
