@@ -1,9 +1,7 @@
 use bevy::prelude::*;
 use bevy::window::WindowMode;
-use bevy::pbr::ExtendedMaterial;
-use bevy::pbr::DefaultOpaqueRendererMethod;
 use bevy_egui::EguiPlugin;
-use map::init_map;
+use bevy::pbr::ExtendedMaterial;
 
 mod center;
 mod env;
@@ -12,8 +10,9 @@ mod ui;
 mod water;
 
 use center::center;
-use water::Water;
+use water::{Water, WaterPlugin};
 use env::init_env;
+use map::init_map;
 use map::{HexType, MapInfo};
 
 pub struct BattleIslesGame;
@@ -21,8 +20,6 @@ pub struct BattleIslesGame;
 impl BattleIslesGame {
     pub fn run() {
         App::new()
-            .insert_resource(Msaa::Off)
-            .insert_resource(DefaultOpaqueRendererMethod::deferred())
             .add_plugins(DefaultPlugins.set(WindowPlugin {
                 primary_window: Some(Window {
                     mode: WindowMode::Windowed,
@@ -32,7 +29,7 @@ impl BattleIslesGame {
                 ..default()
             }))
             .add_plugins(EguiPlugin)
-            .add_plugins(MaterialPlugin::<ExtendedMaterial<StandardMaterial, Water>>::default())
+            .add_plugins(WaterPlugin)
             .add_systems(Startup, setup)
             .add_systems(Update, ui::ui_system)
             .run();

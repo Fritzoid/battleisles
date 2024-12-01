@@ -3,6 +3,8 @@ use bevy::pbr::MaterialExtension;
 use bevy::render::render_resource::AsBindGroup;
 use bevy::render::render_resource::ShaderType;
 use bevy::render::render_resource::ShaderRef;
+use bevy::pbr::DefaultOpaqueRendererMethod;
+use bevy::pbr::ExtendedMaterial;
 
 const SHADER_ASSET_PATH: &str = "shaders/water_material.wgsl";
 
@@ -35,5 +37,15 @@ pub struct WaterSettings {
 impl MaterialExtension for Water {
     fn deferred_fragment_shader() -> ShaderRef {
         SHADER_ASSET_PATH.into()
+    }
+}
+
+pub struct WaterPlugin;
+
+impl Plugin for WaterPlugin {
+    fn build(&self, app: &mut App) {
+        app.insert_resource(Msaa::Off);
+        app.insert_resource(DefaultOpaqueRendererMethod::deferred());
+        app.add_plugins(MaterialPlugin::<ExtendedMaterial<StandardMaterial, Water>>::default());
     }
 }
