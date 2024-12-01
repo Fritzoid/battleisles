@@ -6,50 +6,24 @@ pub(crate) fn center(
     meshes: &mut ResMut<'_, Assets<Mesh>>,
     materials: &mut ResMut<'_, Assets<StandardMaterial>>,
 ) {
-    commands.spawn((
-        PbrBundle {
-            mesh: meshes.add(Cylinder::new(0.01, 1.0)),
-            transform: Transform {
-                translation: Vec3::new(0.5, 0.0, 0.0),
-                rotation: Quat::from_rotation_z(std::f32::consts::FRAC_PI_2),
-                ..default()
-            },
-            material: materials.add(StandardMaterial::from_color(
-                bevy::color::palettes::css::RED,
-            )),
+    commands.spawn((Mesh3d(meshes.add(Cylinder::new(0.01, 1.0))), MeshMaterial3d(materials.add(StandardMaterial::from_color(
+        bevy::color::palettes::css::RED))), Transform {
+            translation: Vec3::new(0.5, 0.0, 0.0),
+            rotation: Quat::from_rotation_z(std::f32::consts::FRAC_PI_2),
             ..default()
-        },
-        NotShadowCaster,
-    ));
+        }, NotShadowCaster));
 
-    commands.spawn((
-        PbrBundle {
-            mesh: meshes.add(Cylinder::new(0.01, 1.0)),
-            transform: Transform {
-                translation: Vec3::new(0.0, 0.5, 0.0),
-                ..default()
-            },
-            material: materials.add(StandardMaterial::from_color(
-                bevy::color::palettes::css::GREEN,
-            )),
+    commands.spawn((Mesh3d(meshes.add(Cylinder::new(0.01, 1.0))), MeshMaterial3d(materials.add(StandardMaterial::from_color(
+        bevy::color::palettes::css::GREEN))), Transform {
+            translation: Vec3::new(0.0, 0.5, 0.0),
+            rotation: Quat::from_rotation_z(std::f32::consts::FRAC_PI_2),
             ..default()
-        },
-        NotShadowCaster,
-    ));
+        }, NotShadowCaster));
 
-    commands.spawn((
-        PbrBundle {
-            mesh: meshes.add(Cylinder::new(0.01, 1.0)),
-            transform: Transform {
-                translation: Vec3::new(0.0, 0.0, 0.5),
-                rotation: Quat::from_rotation_x(-std::f32::consts::FRAC_PI_2),
-                ..default()
-            },
-            material: materials.add(StandardMaterial::from_color(
-                bevy::color::palettes::css::BLUE,
-            )),
+    commands.spawn((Mesh3d(meshes.add(Cylinder::new(0.01, 1.0))), MeshMaterial3d(materials.add(StandardMaterial::from_color(
+        bevy::color::palettes::css::BLUE))), Transform {
+            translation: Vec3::new(0.0, 0.0, 0.5),
+            rotation: Quat::from_rotation_z(std::f32::consts::FRAC_PI_2),
             ..default()
-        },
-        NotShadowCaster,
-    ));
+        }, NotShadowCaster));
 }

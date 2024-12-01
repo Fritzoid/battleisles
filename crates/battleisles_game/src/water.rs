@@ -44,7 +44,6 @@ pub struct WaterPlugin;
 
 impl Plugin for WaterPlugin {
     fn build(&self, app: &mut App) {
-        app.insert_resource(Msaa::Off);
         app.insert_resource(DefaultOpaqueRendererMethod::deferred());
         app.add_plugins(MaterialPlugin::<ExtendedMaterial<StandardMaterial, Water>>::default());
     }

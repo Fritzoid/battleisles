@@ -1,10 +1,10 @@
 use bevy::prelude::*;
 use bevy::pbr::ExtendedMaterial;
-use bevy::render::texture::ImageLoaderSettings;
-use bevy::render::texture::ImageSampler;
-use bevy::render::texture::ImageSamplerDescriptor;
-use bevy::render::texture::ImageAddressMode;
-use bevy::render::texture::ImageFilterMode;
+use bevy::image::ImageLoaderSettings;
+use bevy::image::ImageSampler;
+use bevy::image::ImageSamplerDescriptor;
+use bevy::image::ImageAddressMode;
+use bevy::image::ImageFilterMode;
 use bevy::math::vec4;
 use crate::water::Water;
 use crate::water::WaterSettings;
@@ -122,47 +122,32 @@ pub fn init_map(
         x = 0.0;
         for w in 1..=map.width {
             if map.hexes[i] == HexType::DeepWater {
-                commands.spawn(MaterialMeshBundle {
-                    mesh: mesh_handle.clone(),
-                    material: deepwater_mat.clone(),
-                    transform: Transform {
-                        translation: Vec3::new(x, 0.0, z),
-                        rotation: Quat::from_rotation_x(-std::f32::consts::FRAC_PI_2)
-                            * Quat::from_rotation_z(std::f32::consts::FRAC_PI_2 / 3.0),
-                        ..default()
-                    },
+                commands.spawn((Mesh3d(mesh_handle.clone()), MeshMaterial3d(deepwater_mat.clone()), Transform {
+                    translation: Vec3::new(x, 0.0, z),
+                    rotation: Quat::from_rotation_x(-std::f32::consts::FRAC_PI_2)
+                        * Quat::from_rotation_z(std::f32::consts::FRAC_PI_2 / 3.0),
                     ..default()
-                });
+                }));
             } else if map.hexes[i] == HexType::ShallowWater {
-                commands.spawn(MaterialMeshBundle {
-                    mesh: mesh_handle.clone(),
-                    material: shallowwater_mat.clone(),
-                    transform: Transform {
-                        translation: Vec3::new(x, 0.0, z),
-                        rotation: Quat::from_rotation_x(-std::f32::consts::FRAC_PI_2)
-                            * Quat::from_rotation_z(std::f32::consts::FRAC_PI_2 / 3.0),
-                        ..default()
-                    },
+                commands.spawn((Mesh3d(mesh_handle.clone()), MeshMaterial3d(shallowwater_mat.clone()), Transform {
+                    translation: Vec3::new(x, 0.0, z),
+                    rotation: Quat::from_rotation_x(-std::f32::consts::FRAC_PI_2)
+                        * Quat::from_rotation_z(std::f32::consts::FRAC_PI_2 / 3.0),
                     ..default()
-                });
+                }));
             }
             else {
-                commands.spawn(PbrBundle {
-                    mesh: mesh_handle.clone(),
-                    material: match map.hexes[i] {
-                        HexType::Plains => plains_mat.clone(),
-                        HexType::Mountains => mountains_mat.clone(),
-                        HexType::Hills => hills_mat.clone(),
-                        _ => unreachable!(),
-                    },
-                    transform: Transform {
-                        translation: Vec3::new(x, 0.0, z),
-                        rotation: Quat::from_rotation_x(-std::f32::consts::FRAC_PI_2)
-                            * Quat::from_rotation_z(std::f32::consts::FRAC_PI_2 / 3.0),
-                        ..default()
-                    },
+                commands.spawn((Mesh3d(mesh_handle.clone()), MeshMaterial3d(match map.hexes[i] {
+                    HexType::Plains => plains_mat.clone(),
+                    HexType::Mountains => mountains_mat.clone(),
+                    HexType::Hills => hills_mat.clone(),
+                    _ => unreachable!(),
+                }), Transform {
+                    translation: Vec3::new(x, 0.0, z),
+                    rotation: Quat::from_rotation_x(-std::f32::consts::FRAC_PI_2)
+                        * Quat::from_rotation_z(std::f32::consts::FRAC_PI_2 / 3.0),
                     ..default()
-                });
+                }));
             }
 
             i += 1;
