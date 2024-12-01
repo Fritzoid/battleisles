@@ -3,8 +3,6 @@ use bevy::window::WindowMode;
 use bevy::pbr::ExtendedMaterial;
 use bevy::pbr::DefaultOpaqueRendererMethod;
 use bevy_egui::EguiPlugin;
-use bevy_mod_raycast::prelude::*;
-use bevy_panorbit_camera::PanOrbitCameraPlugin;
 use map::init_map;
 
 mod center;
@@ -33,9 +31,7 @@ impl BattleIslesGame {
                 }),
                 ..default()
             }))
-            .add_plugins(PanOrbitCameraPlugin)
             .add_plugins(EguiPlugin)
-            .add_plugins(CursorRayPlugin)
             .add_plugins(MaterialPlugin::<ExtendedMaterial<StandardMaterial, Water>>::default())
             .add_systems(Startup, setup)
             .add_systems(Update, ui::ui_system)
