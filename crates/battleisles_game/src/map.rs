@@ -12,7 +12,7 @@ use crate::water::WaterSettings;
 const HEX_SIZE: f32 = 5.0;
 const HEX_THICKNESS: f32 = 0.01;
 
-#[derive(PartialEq)]
+#[derive(PartialEq, Clone)]
 pub enum HexType {
     DeepWater,
     ShallowWater,
