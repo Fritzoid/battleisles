@@ -13,7 +13,7 @@ jobs:
     runs-on: self-hosted
 
     container:
-      image: rust:latest
+      image: fritzoid/rust-bevy-builder:latest
 
     steps:
     - name: Checkout code
