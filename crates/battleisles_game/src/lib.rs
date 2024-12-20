@@ -2,6 +2,7 @@ use bevy::prelude::*;
 use bevy::window::WindowMode;
 use bevy_egui::EguiPlugin;
 use bevy::pbr::ExtendedMaterial;
+use bevy_panorbit_camera::PanOrbitCameraPlugin;
 
 mod center;
 mod env;
@@ -30,6 +31,7 @@ impl BattleIslesGame {
             }))
             .add_plugins(EguiPlugin)
             .add_plugins(WaterPlugin)
+            .add_plugins(PanOrbitCameraPlugin)
             .add_systems(Startup, setup)
             .add_systems(Update, ui::ui_system)
             .run();
