@@ -53,30 +53,6 @@ fn setup(
         hexes: vec![HexType::DeepWater; 20 * 20],
     };
 
-    /* 
-    let map = MapInfo {
-        width: 5,
-        height: 3,
-        hexes: vec![
-            HexType::DeepWater,
-            HexType::Plains,
-            HexType::ShallowWater,
-            HexType::Mountains,
-            HexType::Hills,
-            HexType::DeepWater,
-            HexType::DeepWater,
-            HexType::DeepWater,
-            HexType::DeepWater,
-            HexType::Hills,
-            HexType::ShallowWater,
-            HexType::ShallowWater,
-            HexType::Plains,
-            HexType::Plains,
-            HexType::Mountains,
-        ],
-    };
-    */
-
     center(&mut commands, &mut meshes, &mut materials);
     init_map(map, &mut meshes, &mut commands, &mut materials, &mut water_materials, &asset_server);
     init_env(&mut commands, &asset_server);
