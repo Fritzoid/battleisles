@@ -46,11 +46,10 @@ fn setup(
     asset_server: Res<AssetServer>,
 
 ) {
-    // Make a map that is 20 x 20 hexes and set them all to deepwater
      let map = MapInfo {
         width: 20,
         height: 20,
-        hexes: vec![HexType::DeepWater; 20 * 20],
+        hexes: vec![HexType::Plains; 20 * 20],
     };
 
     center(&mut commands, &mut meshes, &mut materials);

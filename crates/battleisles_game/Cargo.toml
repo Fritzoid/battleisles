@@ -4,7 +4,8 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-bevy = "0.15.0"
+getrandom = { version = "0.3", features = ["wasm_js"] }
+bevy = "=0.15.2"
 bevy_egui = "0.33.0"
 bevy_panorbit_camera = "0.25.0"
 bevy_mod_raycast = "0.18.0"
