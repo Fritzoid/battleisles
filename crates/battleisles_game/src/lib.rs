@@ -17,7 +17,7 @@ impl BattleIslesGame {
                 }),
                 ..default()
             }))
-            .add_plugins(EguiPlugin)
+            .add_plugins( EguiPlugin { enable_multipass_for_primary_context: false, } )
             .add_systems(Startup, setup)
             .add_systems(Update, ui::ui_system)
             .run();
