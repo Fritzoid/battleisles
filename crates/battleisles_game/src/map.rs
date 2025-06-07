@@ -1,159 +1,97 @@
 use bevy::prelude::*;
-use bevy::pbr::ExtendedMaterial;
-use bevy::image::ImageLoaderSettings;
-use bevy::image::ImageSampler;
-use bevy::image::ImageSamplerDescriptor;
-use bevy::image::ImageAddressMode;
-use bevy::image::ImageFilterMode;
-use bevy::math::vec4;
-use crate::water::Water;
-use crate::water::WaterSettings;
 
-const HEX_SIZE: f32 = 5.0;
-const HEX_THICKNESS: f32 = 0.01;
+const HEX_RADIUS: f32 = 5.0;
+const HEX_THICKNESS: f32 = 1.0;
 
 #[derive(PartialEq, Clone)]
 pub enum HexType {
-    DeepWater,
-    ShallowWater,
     Plains,
     Hills,
     Mountains,
+    DeepWater,
+    ShallowWater,
 }
 
-pub struct MapInfo {
-    pub width: u16,
-    pub height: u16,
+pub struct Hex {
+    pub hex_type: HexType,
+    pub position: Vec2,
+}
+
+pub struct Map {
+    pub rows: u16,
+    pub collumns: u16,
     pub hexes: Vec<HexType>,
 }
 
+impl Map {
+    pub fn new(rows: u16, collumns: u16) -> Self {
+        let total_hexes = rows * collumns - rows / 2 ;
+        let hexes = vec![HexType::DeepWater; total_hexes as usize];
+        Map {
+            rows,
+            collumns,
+            hexes,
+        }
+    }
+}
+
+/*
 pub fn init_map(
-    map: MapInfo,
     meshes: &mut Assets<Mesh>,
     commands: &mut Commands,
     materials: &mut Assets<StandardMaterial>,
-    water_materials: &mut Assets<ExtendedMaterial<StandardMaterial, Water>>,
-    asset_server: &Res<AssetServer>,
 ) {
-    let shape = RegularPolygon::new(HEX_SIZE, 6);
-    let mesh = Extrusion::new(shape, HEX_THICKNESS);
-    let mesh_handle = meshes.add(mesh);
-    let plains_mat = materials.add(StandardMaterial::from_color(
-        bevy::color::palettes::css::GREEN,
-    ));
-    let mountains_mat = materials.add(StandardMaterial::from_color(
-        bevy::color::palettes::css::GRAY,
-    ));
-    let hills_mat = materials.add(StandardMaterial::from_color(
-        bevy::color::palettes::css::YELLOW,
-    ));
+    let hex_mesh_handle = create_hex_mesh(meshes);
+    let hex_materials = create_hex_materials(materials);
 
-    let deepwater_mat = water_materials.add(ExtendedMaterial {
-        base: StandardMaterial {
-            base_color: bevy::color::palettes::css::DARK_BLUE.into(),
-            perceptual_roughness: 0.0,
-            ..default()
-        },
-        extension: Water {
-            normals: asset_server.load_with_settings::<Image, ImageLoaderSettings>(
-                "textures/water_normals.png",
-                |settings| {
-                    settings.is_srgb = false;
-                    settings.sampler = ImageSampler::Descriptor(ImageSamplerDescriptor {
-                        address_mode_u: ImageAddressMode::Repeat,
-                        address_mode_v: ImageAddressMode::Repeat,
-                        mag_filter: ImageFilterMode::Linear,
-                        min_filter: ImageFilterMode::Linear,
-                        ..default()
-                    });
-                },
-            ),
-            // These water settings are just random values to create some
-            // variety.
-            settings: WaterSettings {
-                octave_vectors: [
-                    vec4(0.080, 0.059, 0.073, -0.062),
-                    vec4(0.153, 0.138, -0.149, -0.195),
-                ],
-                octave_scales: vec4(1.0, 2.1, 7.9, 14.9) * 5.0,
-                octave_strengths: vec4(0.16, 0.18, 0.093, 0.044),
-            },
-        },
-    });
-
-    let shallowwater_mat = water_materials.add(ExtendedMaterial {
-        base: StandardMaterial {
-            base_color: bevy::color::palettes::css::BLUE.into(),
-            perceptual_roughness: 0.0,
-            ..default()
-        },
-        extension: Water {
-            normals: asset_server.load_with_settings::<Image, ImageLoaderSettings>(
-                "textures/water_normals.png",
-                |settings| {
-                    settings.is_srgb = false;
-                    settings.sampler = ImageSampler::Descriptor(ImageSamplerDescriptor {
-                        address_mode_u: ImageAddressMode::Repeat,
-                        address_mode_v: ImageAddressMode::Repeat,
-                        mag_filter: ImageFilterMode::Linear,
-                        min_filter: ImageFilterMode::Linear,
-                        ..default()
-                    });
-                },
-            ),
-            // These water settings are just random values to create some
-            // variety.
-            settings: WaterSettings {
-                octave_vectors: [
-                    vec4(0.080, 0.059, 0.073, -0.062),
-                    vec4(0.153, 0.138, -0.149, -0.195),
-                ],
-                octave_scales: vec4(1.0, 2.1, 7.9, 14.9) * 5.0,
-                octave_strengths: vec4(0.16, 0.18, 0.093, 0.044),
-            },
-        },
-    });
-
-    let mut x: f32;
-    let mut z: f32 = 0.0;
     let mut i: usize = 0;
-
-    for h in 1..=map.height {
-        x = 0.0;
-        for w in 1..=map.width {
-            if map.hexes[i] == HexType::DeepWater {
-                commands.spawn((Mesh3d(mesh_handle.clone()), MeshMaterial3d(deepwater_mat.clone()), Transform {
-                    translation: Vec3::new(x, 0.0, z),
-                    rotation: Quat::from_rotation_x(-std::f32::consts::FRAC_PI_2)
-                        * Quat::from_rotation_z(std::f32::consts::FRAC_PI_2 / 3.0),
-                    ..default()
-                }));
-            } else if map.hexes[i] == HexType::ShallowWater {
-                commands.spawn((Mesh3d(mesh_handle.clone()), MeshMaterial3d(shallowwater_mat.clone()), Transform {
-                    translation: Vec3::new(x, 0.0, z),
-                    rotation: Quat::from_rotation_x(-std::f32::consts::FRAC_PI_2)
-                        * Quat::from_rotation_z(std::f32::consts::FRAC_PI_2 / 3.0),
-                    ..default()
-                }));
-            }
-            else {
-                commands.spawn((Mesh3d(mesh_handle.clone()), MeshMaterial3d(match map.hexes[i] {
-                    HexType::Plains => plains_mat.clone(),
-                    HexType::Mountains => mountains_mat.clone(),
-                    HexType::Hills => hills_mat.clone(),
-                    _ => unreachable!(),
-                }), Transform {
-                    translation: Vec3::new(x, 0.0, z),
-                    rotation: Quat::from_rotation_x(-std::f32::consts::FRAC_PI_2)
-                        * Quat::from_rotation_z(std::f32::consts::FRAC_PI_2 / 3.0),
-                    ..default()
-                }));
-            }
-
-            i += 1;
-            x += 3.0 / 2.0 * HEX_SIZE;
-            z += ((3.0f32).sqrt() / 2.0 * HEX_SIZE) * if w % 2 == 0 { -1.0 } else { 1.0 };
-        }
-        z = h as f32 * HEX_SIZE * 3.0f32.sqrt();
+    for row in 0..map.rows {
+    for col in 0..map.width {
+        let x = 
+        commands.spawn((
+            Mesh3d(hex_mesh_handle.clone()),
+            MeshMaterial3d(match map.hexes[i] {
+                HexType::Plains => hex_materials[0].clone(),
+                HexType::Mountains => hex_materials[1].clone(),
+                HexType::Hills => hex_materials[2].clone(),
+                HexType::DeepWater => hex_materials[3].clone(),
+                HexType::ShallowWater => hex_materials[4].clone(),
+            }),
+            Transform {
+                translation: Vec3::new(0.0, 0.0, 0.0),
+                rotation: Quat::from_rotation_x(-std::f32::consts::FRAC_PI_2),
+                ..default()
+            },
+        ));
+        i += 1;
     }
 }
+}
+
+fn create_hex_mesh(meshes: &mut Assets<Mesh>) -> Handle<Mesh> {
+    let shape = RegularPolygon::new(HEX_RADIUS, 6);
+    let mesh = Extrusion::new(shape, HEX_THICKNESS);
+    let mesh_handle = meshes.add(mesh);
+    mesh_handle
+}
+
+fn create_hex_materials(materials: &mut Assets<StandardMaterial>) -> Vec<Handle<StandardMaterial>> {
+    let mut material_handles = Vec::<Handle<StandardMaterial>>::new();
+    material_handles.push(materials.add(StandardMaterial::from_color(
+        bevy::color::palettes::css::GREEN,
+    )));
+    material_handles.push(materials.add(StandardMaterial::from_color(
+        bevy::color::palettes::css::GRAY,
+    )));
+    material_handles.push(materials.add(StandardMaterial::from_color(
+        bevy::color::palettes::css::YELLOW,
+    )));
+    material_handles.push(materials.add(StandardMaterial::from_color(
+        bevy::color::palettes::css::DARK_BLUE,
+    )));
+    material_handles.push(materials.add(StandardMaterial::from_color(
+        bevy::color::palettes::css::LIGHT_BLUE,
+    )));
+    material_handles
+}
+*/
