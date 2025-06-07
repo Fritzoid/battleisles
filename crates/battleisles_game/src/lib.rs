@@ -1,20 +1,8 @@
 use bevy::prelude::*;
 use bevy::window::WindowMode;
 use bevy_egui::EguiPlugin;
-use bevy::pbr::ExtendedMaterial;
-use bevy_panorbit_camera::PanOrbitCameraPlugin;
 
-mod center;
-mod env;
-mod map;
 mod ui;
-mod water;
-
-use center::center;
-use water::{Water, WaterPlugin};
-use env::init_env;
-use map::init_map;
-use map::{HexType, MapInfo};
 
 pub struct BattleIslesGame;
 
@@ -30,8 +18,6 @@ impl BattleIslesGame {
                 ..default()
             }))
             .add_plugins(EguiPlugin)
-            .add_plugins(WaterPlugin)
-            .add_plugins(PanOrbitCameraPlugin)
             .add_systems(Startup, setup)
             .add_systems(Update, ui::ui_system)
             .run();
@@ -42,17 +28,20 @@ fn setup(
     mut commands: Commands,
     mut meshes: ResMut<Assets<Mesh>>,
     mut materials: ResMut<Assets<StandardMaterial>>,
-    mut water_materials: ResMut<Assets<ExtendedMaterial<StandardMaterial, Water>>>,
-    asset_server: Res<AssetServer>,
-
 ) {
-     let map = MapInfo {
-        width: 20,
-        height: 20,
-        hexes: vec![HexType::Plains; 20 * 20],
-    };
+    commands.spawn((
+        PointLight {
+            shadows_enabled: true,
+            intensity: 10_000_000.,
+            range: 100.0,
+            shadow_depth_bias: 0.2,
+            ..default()
+        },
+        Transform::from_xyz(0.0, 60.0, 0.0),
+    ));
 
-    center(&mut commands, &mut meshes, &mut materials);
-    init_map(map, &mut meshes, &mut commands, &mut materials, &mut water_materials, &asset_server);
-    init_env(&mut commands, &asset_server);
+    commands.spawn((
+        Camera3d::default(),
+        Transform::from_xyz(0.0, 50., 0.0).looking_at(Vec3::ZERO, Vec3::Y),
+    ));
 }

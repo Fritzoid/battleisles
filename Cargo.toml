@@ -5,11 +5,13 @@ edition = "2021"
 
 [workspace]
 members = [
+    "crates/battleisles_domain",
     "crates/battleisles_game",
     "editor",
 ]
 
 [dependencies]
+battleisles_domain = { path = "crates/battleisles_domain", version = "0.1.0" }
 battleisles_game = { path = "crates/battleisles_game", version = "0.1.0" }
 
 [profile.dev.package."*"]
