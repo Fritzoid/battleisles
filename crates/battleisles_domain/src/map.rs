@@ -1,16 +1,4 @@
-#[derive(PartialEq, Clone, Debug, Copy)]
-enum HexType {
-    Plains,
-    Hills,
-    Mountains,
-    DeepWater,
-    ShallowWater,
-}
-
-#[derive(PartialEq, Clone, Debug, Copy)]
-struct Hex {
-    hex_type: HexType,
-}
+use crate::hex::{Hex, HexNeighbor, Terrain};
 
 #[derive(PartialEq, Clone, Debug)]
 struct Map {
@@ -20,18 +8,33 @@ struct Map {
 }
 
 #[derive(Debug, PartialEq)]
-enum MapCreationErrors {
+enum MapErrors {
     InvalidDimensions,
 }
 
 impl Map {
-    pub fn try_new(rows: u16, collumns: u16) -> Result<Self, MapCreationErrors> {
+    pub fn try_new(rows: u16, collumns: u16) -> Result<Self, MapErrors> {
         if rows == 0 || collumns == 0 {
-            return Err(MapCreationErrors::InvalidDimensions);
+            return Err(MapErrors::InvalidDimensions);
         }
         
-        let total_hexes = rows * collumns - rows / 2 ;
-        let hexes = vec![Hex {hex_type: HexType::DeepWater}; total_hexes as usize];
+        let total_hexes = rows * collumns - rows / 2;
+        let mut hexes = Vec::with_capacity(total_hexes as usize);
+        let mut hex_count = 0;
+        for row in 0..rows {
+            let cols_in_row = if row % 2 == 1 && collumns > 0 { collumns - 1 } else { collumns };
+            for col in 0..cols_in_row {
+                let position = (row as i32, col as i32);
+                let hex = Hex {
+                    terrain: Terrain::DeepWater,
+                    position,
+                    neighbors: std::array::from_fn(|_| HexNeighbor::None),
+                };
+                hexes.push(hex);
+                hex_count += 1;
+            }
+        }
+        debug_assert_eq!(hex_count, total_hexes as usize);
         Ok(Map {
             rows,
             collumns,
@@ -43,16 +46,17 @@ impl Map {
 #[cfg(test)]
 mod tests {
 
-    use super::{Map, HexType};
+    use super::Map;
+    use crate::hex::{Terrain, HexNeighbor};
 
     #[test]
     fn test_invalid_map_creation() {
         let invalid_map = Map::try_new(0, 10);
         assert!(invalid_map.is_err());
-        assert_eq!(invalid_map.err(), Some(super::MapCreationErrors::InvalidDimensions));
+        assert_eq!(invalid_map.err(), Some(super::MapErrors::InvalidDimensions));
         let invalid_map = Map::try_new(10, 0);
         assert!(invalid_map.is_err());
-        assert_eq!(invalid_map.err(), Some(super::MapCreationErrors::InvalidDimensions));
+        assert_eq!(invalid_map.err(), Some(super::MapErrors::InvalidDimensions));
     }
 
     #[test]
@@ -63,7 +67,15 @@ mod tests {
                 assert_eq!(sut.rows, rows);
                 assert_eq!(sut.collumns, collumns);
                 assert_eq!(sut.hexes.len(), (rows * collumns - rows / 2) as usize);
-                assert!(sut.hexes.iter().all(|&hex| hex.hex_type == HexType::DeepWater));
+                assert!(sut.hexes.iter().all(|hex| hex.terrain == Terrain::DeepWater));
+                assert!(sut.hexes.iter().all(|hex| hex.neighbors.iter().all(|n| *n == HexNeighbor::None)));
+                for (i, hex) in sut.hexes.iter().enumerate() {
+                    let expected_position = (
+                        (i as u16 / collumns) as i32,
+                        (i as u16 % collumns) as i32,
+                    );
+                    assert_eq!(hex.position, expected_position);
+                }
             }
         }
     }
