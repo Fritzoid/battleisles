@@ -9,13 +9,18 @@ struct Map {
 
 #[derive(Debug, PartialEq)]
 enum MapErrors {
-    InvalidDimensions,
+    CannotHaveAZeroDimension,
+    IfOneColumnThenOnlyOneRow
 }
 
 impl Map {
     pub fn try_new(rows: u16, collumns: u16) -> Result<Self, MapErrors> {
         if rows == 0 || collumns == 0 {
-            return Err(MapErrors::InvalidDimensions);
+            return Err(MapErrors::CannotHaveAZeroDimension);
+        }
+
+        if collumns == 1 && rows > 1 {
+            return Err(MapErrors::IfOneColumnThenOnlyOneRow);
         }
         
         let total_hexes = rows * collumns - rows / 2;
@@ -46,37 +51,40 @@ impl Map {
 #[cfg(test)]
 mod tests {
 
+    use rstest::*;
     use super::Map;
     use crate::hex::{Terrain, HexNeighbor};
 
-    #[test]
-    fn test_invalid_map_creation() {
-        let invalid_map = Map::try_new(0, 10);
-        assert!(invalid_map.is_err());
-        assert_eq!(invalid_map.err(), Some(super::MapErrors::InvalidDimensions));
-        let invalid_map = Map::try_new(10, 0);
-        assert!(invalid_map.is_err());
-        assert_eq!(invalid_map.err(), Some(super::MapErrors::InvalidDimensions));
+    #[rstest]
+    fn test_invalid_dimension_map_creation() {
+        let sut = Map::try_new(0, 10);
+        assert!(sut.is_err());
+        assert_eq!(sut.err(), Some(super::MapErrors::CannotHaveAZeroDimension));
+        let sut = Map::try_new(10, 0);
+        assert!(sut.is_err());
+        assert_eq!(sut.err(), Some(super::MapErrors::CannotHaveAZeroDimension));
     }
 
-    #[test]
-    fn test_map_creation() {
-        for rows in 1..=10 {
-            for collumns in 1..=10 {
-                let sut = Map::try_new(rows, collumns).unwrap();
-                assert_eq!(sut.rows, rows);
-                assert_eq!(sut.collumns, collumns);
-                assert_eq!(sut.hexes.len(), (rows * collumns - rows / 2) as usize);
-                assert!(sut.hexes.iter().all(|hex| hex.terrain == Terrain::DeepWater));
-                assert!(sut.hexes.iter().all(|hex| hex.neighbors.iter().all(|n| *n == HexNeighbor::None)));
-                for (i, hex) in sut.hexes.iter().enumerate() {
-                    let expected_position = (
-                        (i as u16 / collumns) as i32,
-                        (i as u16 % collumns) as i32,
-                    );
-                    assert_eq!(hex.position, expected_position);
-                }
-            }
+    #[rstest]
+    fn test_only_one_column_only_one_row_map_creation() {
+        let sut = Map::try_new(2, 1);
+        assert!(sut.is_err());
+        assert_eq!(sut.err(), Some(super::MapErrors::IfOneColumnThenOnlyOneRow));
+    }
+
+    #[rstest]
+    #[case(3, 3, &[(0, 0), (0, 1), (0, 2), (1, 0), (1, 1), (2, 0), (2, 1), (2, 2)])]
+    #[case(3, 4, &[(0, 0), (0, 1), (0, 2), (0, 3), (1, 0), (1, 1), (1, 2), (2, 0), (2, 1), (2, 2), (2, 3)])]
+    #[case(4, 3, &[(0, 0), (0, 1), (0, 2), (1, 0), (1, 1), (2, 0), (2, 1), (2, 2), (3, 0), (3, 1)])]
+    fn test_map_creation(#[case] rows: u16, #[case] collumns: u16, #[case] expected_positions: &[(i32, i32)]) {
+        let sut = Map::try_new(rows, collumns).unwrap();
+        assert_eq!(sut.rows, rows);
+        assert_eq!(sut.collumns, collumns);
+        assert_eq!(sut.hexes.len(), (rows * collumns - rows / 2) as usize);
+        assert!(sut.hexes.iter().all(|hex| hex.terrain == Terrain::DeepWater));
+        assert!(sut.hexes.iter().all(|hex| hex.neighbors.iter().all(|n| *n == HexNeighbor::None)));
+        for (i, pos) in expected_positions.iter().enumerate() {
+            assert_eq!(sut.hexes[i].position, *pos);
         }
     }
 }
