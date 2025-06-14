@@ -79,7 +79,7 @@ mod tests {
 
     use rstest::*;
     use super::Map;
-    use crate::hex::{Terrain, HexNeighbor};
+    use crate::hex::{Terrain};
 
     #[rstest]
     fn test_invalid_dimension_map_creation() {
@@ -108,9 +108,8 @@ mod tests {
         assert_eq!(sut.collumns, collumns);
         assert_eq!(sut.hexes.len(), (rows * collumns - rows / 2) as usize);
         assert!(sut.hexes.iter().all(|hex| hex.terrain == Terrain::DeepWater));
-        for (i, pos) in expected_positions.iter().enumerate() {
-            assert_eq!(sut.hexes[i].position, *pos);
-        }
+        assert_eq!(sut.hexes.len(), expected_positions.len());
+        assert!(sut.hexes.iter().zip(expected_positions.iter()).all(|(hex, pos)| hex.position == *pos));
     }
 
     #[rstest]
