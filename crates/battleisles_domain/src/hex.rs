@@ -9,11 +9,7 @@ pub(crate) enum Terrain {
     ShallowWater,
 }
 
-#[derive(PartialEq, Clone, Debug)]
-pub(crate) enum HexNeighbor {
-    None,
-    Some(Rc<Hex>),
-} 
+pub(crate) type HexNeighbor = Option<usize>;
 
 #[derive(PartialEq, Clone, Debug)]
 pub(crate) struct Hex {

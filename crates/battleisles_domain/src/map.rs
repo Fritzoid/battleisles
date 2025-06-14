@@ -15,6 +15,7 @@ enum MapErrors {
 
 impl Map {
     pub fn try_new(rows: u16, collumns: u16) -> Result<Self, MapErrors> {
+
         if rows == 0 || collumns == 0 {
             return Err(MapErrors::CannotHaveAZeroDimension);
         }
@@ -24,22 +25,47 @@ impl Map {
         }
         
         let total_hexes = rows * collumns - rows / 2;
-        let mut hexes = Vec::with_capacity(total_hexes as usize);
-        let mut hex_count = 0;
+        let mut hexes: Vec<Hex> = Vec::with_capacity(total_hexes as usize);
+        let mut current_idx = 0;
         for row in 0..rows {
-            let cols_in_row = if row % 2 == 1 && collumns > 0 { collumns - 1 } else { collumns };
+            let is_odd_row = row % 2 == 1;
+            let cols_in_row = if is_odd_row { collumns - 1 } else { collumns };
             for col in 0..cols_in_row {
                 let position = (row as i32, col as i32);
-                let hex = Hex {
+                let mut hex = Hex {
                     terrain: Terrain::DeepWater,
                     position,
                     neighbors: std::array::from_fn(|_| HexNeighbor::None),
                 };
+                match (row, col) {
+                    (0, 0) => {},
+                    (0, _) => {
+                        hex.neighbors[4] = Some((col - 1) as usize);
+                        hexes[current_idx - 1].neighbors[1] = Some(current_idx);
+                    },
+                    (_,0) => {
+                        hex.neighbors[0] = Some((current_idx - ((collumns as usize) - 1)) as usize);
+                        hexes[current_idx - ((collumns as usize) - 1)].neighbors[3] = Some(current_idx);
+                        if is_odd_row {
+                            hex.neighbors[5] = Some((current_idx - (collumns as usize)) as usize);
+                            hexes[current_idx - (collumns as usize)].neighbors[2] = Some(current_idx);
+                        }
+                    },
+                    (_, _) => {
+                        if col != collumns - 1 {
+                            hex.neighbors[0] = Some((current_idx - ((collumns as usize) - 1)) as usize);
+                            hexes[(current_idx - ((collumns as usize) - 1)) as usize].neighbors[3] = Some(current_idx);
+                        }
+                        hex.neighbors[5] = Some(current_idx - (collumns as usize));
+                        hexes[(current_idx - (collumns as usize)) as usize].neighbors[2] = Some(current_idx);
+                        hex.neighbors[4] = Some((current_idx - 1) as usize);
+                        hexes[current_idx - 1].neighbors[1] = Some(current_idx);
+                    }
+                }
                 hexes.push(hex);
-                hex_count += 1;
+                current_idx += 1;
             }
         }
-        debug_assert_eq!(hex_count, total_hexes as usize);
         Ok(Map {
             rows,
             collumns,
@@ -76,15 +102,27 @@ mod tests {
     #[case(3, 3, &[(0, 0), (0, 1), (0, 2), (1, 0), (1, 1), (2, 0), (2, 1), (2, 2)])]
     #[case(3, 4, &[(0, 0), (0, 1), (0, 2), (0, 3), (1, 0), (1, 1), (1, 2), (2, 0), (2, 1), (2, 2), (2, 3)])]
     #[case(4, 3, &[(0, 0), (0, 1), (0, 2), (1, 0), (1, 1), (2, 0), (2, 1), (2, 2), (3, 0), (3, 1)])]
-    fn test_map_creation(#[case] rows: u16, #[case] collumns: u16, #[case] expected_positions: &[(i32, i32)]) {
+    fn test_map_creation_positions(#[case] rows: u16, #[case] collumns: u16, #[case] expected_positions: &[(i32, i32)]) {
         let sut = Map::try_new(rows, collumns).unwrap();
         assert_eq!(sut.rows, rows);
         assert_eq!(sut.collumns, collumns);
         assert_eq!(sut.hexes.len(), (rows * collumns - rows / 2) as usize);
         assert!(sut.hexes.iter().all(|hex| hex.terrain == Terrain::DeepWater));
-        assert!(sut.hexes.iter().all(|hex| hex.neighbors.iter().all(|n| *n == HexNeighbor::None)));
         for (i, pos) in expected_positions.iter().enumerate() {
             assert_eq!(sut.hexes[i].position, *pos);
         }
+    }
+
+    #[rstest]
+    fn test_map_creation_neighbors() {
+        let sut = Map::try_new(3, 3).unwrap();
+        assert_eq!(sut.hexes[0].neighbors, [None, Some(1), Some(3), None, None, None]);
+        assert_eq!(sut.hexes[1].neighbors, [None, Some(2), Some(4), Some(3), Some(0), None]);
+        assert_eq!(sut.hexes[2].neighbors, [None, None, None, Some(4), Some(1), None]);
+        assert_eq!(sut.hexes[3].neighbors, [Some(1), Some(4), Some(6), Some(5), None, Some(0)]);
+        assert_eq!(sut.hexes[4].neighbors, [Some(2), None, Some(7), Some(6), Some(3), Some(1)]);
+        assert_eq!(sut.hexes[5].neighbors, [Some(3), Some(6), None, None, None, None]);
+        assert_eq!(sut.hexes[6].neighbors, [Some(4), Some(7), None, None, Some(5), Some(3)]);
+        assert_eq!(sut.hexes[7].neighbors, [None, None, None, None, Some(6), Some(4)]);
     }
 }
