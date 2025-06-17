@@ -1,3 +1,3 @@
-mod map;
-mod hex;
+pub mod map;
+pub mod hex;
 

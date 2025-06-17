@@ -1,7 +1,5 @@
-use std::rc::Rc;
-
-#[derive(PartialEq, Clone, Debug, Copy)]
-pub(crate) enum Terrain {
+#[derive(PartialEq, Clone, Debug, Copy, Eq, Hash)]
+pub enum Terrain {
     Plains,
     Hills,
     Mountains,
@@ -12,10 +10,10 @@ pub(crate) enum Terrain {
 pub(crate) type HexNeighbor = Option<usize>;
 
 #[derive(PartialEq, Clone, Debug)]
-pub(crate) struct Hex {
-    pub(crate) terrain: Terrain,
-    pub(crate) position: (i32, i32),
-    pub(crate) neighbors: [HexNeighbor; 6],
+pub struct Hex {
+    pub terrain: Terrain,
+    pub position: (i32, i32),
+    pub neighbors: [HexNeighbor; 6],
 }
 
 #[cfg(test)]

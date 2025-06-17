@@ -1,20 +1,29 @@
 use crate::hex::{Hex, HexNeighbor, Terrain};
 
 #[derive(PartialEq, Clone, Debug)]
-struct Map {
-    rows: u16,
-    collumns: u16,
-    hexes: Vec<Hex>,
+pub struct Map {
+    pub rows: usize,
+    pub collumns: usize,
+    pub hexes: Vec<Hex>,
 }
 
 #[derive(Debug, PartialEq)]
-enum MapErrors {
+pub enum MapErrors {
     CannotHaveAZeroDimension,
     IfOneColumnThenOnlyOneRow
 }
 
+impl std::fmt::Display for MapErrors {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            MapErrors::CannotHaveAZeroDimension => write!(f, "Map cannot have a zero dimension"),
+            MapErrors::IfOneColumnThenOnlyOneRow => write!(f, "If there is only one column, there can only be one row"),
+        }
+    }
+}
+
 impl Map {
-    pub fn try_new(rows: u16, collumns: u16) -> Result<Self, MapErrors> {
+    pub fn try_new(rows: usize, collumns: usize) -> Result<Self, MapErrors> {
 
         if rows == 0 || collumns == 0 {
             return Err(MapErrors::CannotHaveAZeroDimension);
@@ -102,7 +111,7 @@ mod tests {
     #[case(3, 3, &[(0, 0), (0, 1), (0, 2), (1, 0), (1, 1), (2, 0), (2, 1), (2, 2)])]
     #[case(3, 4, &[(0, 0), (0, 1), (0, 2), (0, 3), (1, 0), (1, 1), (1, 2), (2, 0), (2, 1), (2, 2), (2, 3)])]
     #[case(4, 3, &[(0, 0), (0, 1), (0, 2), (1, 0), (1, 1), (2, 0), (2, 1), (2, 2), (3, 0), (3, 1)])]
-    fn test_map_creation_positions(#[case] rows: u16, #[case] collumns: u16, #[case] expected_positions: &[(i32, i32)]) {
+    fn test_map_creation_positions(#[case] rows: usize, #[case] collumns: usize, #[case] expected_positions: &[(i32, i32)]) {
         let sut = Map::try_new(rows, collumns).unwrap();
         assert_eq!(sut.rows, rows);
         assert_eq!(sut.collumns, collumns);
