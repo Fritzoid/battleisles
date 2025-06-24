@@ -6,7 +6,6 @@ use battleisles_domain::map::Map;
 use battleisles_domain::hex::Terrain;
 
 mod ui;
-
 pub struct BattleIslesGame;
 
 impl BattleIslesGame {
@@ -39,26 +38,31 @@ fn setup(
     mut meshes: ResMut<Assets<Mesh>>,
     mut materials: ResMut<Assets<StandardMaterial>>,
 ) {
+    let rows = 3;
+    let collumns = 3;   
     let hex_mesh = meshes.add(Extrusion::new(RegularPolygon::new(HEX_SIZE, 6), HEX_THICKNESS));
-    let map = Map::try_new(3, 3).expect("Failed to create map");
+    let map = Map::try_new(rows, collumns).expect("Failed to create map");
     let mut idx = 0;
     let mut terrain_materials = TerrainMaterials::default();
+    let x_increment = 3.0_f32.sqrt() * HEX_SIZE;
+    let y_increment = 1.5 * HEX_SIZE;
+    let (center_x, center_y) = compute_map_center(rows as u32, collumns as u32, HEX_SIZE);
     
     map.hexes.iter().for_each(|hex| {
-        let x = hex.position.1 as f32 * (3.0_f32.sqrt() * HEX_SIZE) + 
+        let x = hex.position.1 as f32 * x_increment + 
             if hex.position.0 % 2 == 0 {
                 0.0
             } else {
-                (3.0_f32.sqrt() * HEX_SIZE) / 2.0
+                x_increment / 2.0
             };
-        let y = hex.position.0 as f32 * (1.5 * HEX_SIZE);
+        let y = hex.position.0 as f32 * y_increment;
         let z = 0.0;
         let material = terrain_materials.get_or_create(hex.terrain, materials.as_mut());
         commands.spawn((
             Mesh3d(hex_mesh.clone()),
             MeshMaterial3d(material.clone()),
             Transform { 
-                translation: Vec3::new(x, y, z), 
+                translation: Vec3::new(x - center_x, y - center_y, z), 
                 ..default() 
             },
         ));
@@ -106,4 +110,32 @@ impl TerrainMaterials {
             materials.add(StandardMaterial::from_color(color))
         }).clone()
     }
+}
+
+fn compute_map_center(rows: u32, cols: u32, hex_size: f32) -> (f32, f32) {
+    let dx = hex_size * f32::sqrt(3.0);
+    let dy = hex_size * 1.5;
+
+    let mut sum_x = 0.0;
+    let mut sum_y = 0.0;
+    let mut count = 0.0;
+
+    for y in 0..rows {
+        let row_cols = if y % 2 == 0 { cols } else { cols - 1 };
+        let x_offset = if y % 2 == 0 { 0.0 } else { dx / 2.0 };
+
+        for x in 0..row_cols {
+            let world_x = x as f32 * dx + x_offset;
+            let world_y = y as f32 * dy;
+
+            sum_x += world_x;
+            sum_y += world_y;
+            count += 1.0;
+        }
+    }
+
+    let center_x = sum_x / count;
+    let center_y = sum_y / count;
+
+    (center_x, center_y)
 }
