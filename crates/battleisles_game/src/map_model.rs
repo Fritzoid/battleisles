@@ -4,9 +4,12 @@ use bevy::prelude::*;
 use battleisles_domain::map::Map;
 use battleisles_domain::hex::Terrain;
 
+
 #[derive(Resource)]
 pub struct MapModel {
     map: Map,
+    pub map_width: f32,
+    pub map_height: f32,
     hex_mesh: Handle<Mesh>,
     terrain_materials: TerrainMaterials,
     hex_size: f32,
@@ -18,18 +21,15 @@ impl MapModel {
         commands: &mut Commands,
         meshes: &mut ResMut<Assets<Mesh>>,
         materials: &mut ResMut<Assets<StandardMaterial>>,
-    ) -> Self {
-        let rows = 3;
-        let collumns = 3;
+    ) -> Result<Self, bool> {
         let hex_size = 2.0;
         let hex_thickness = 0.01;
-        let hex_mesh = meshes.add(Extrusion::new(RegularPolygon::new(hex_size, 6), hex_thickness));
-        let map = Map::try_new(rows, collumns).expect("Failed to create map");
-        let mut idx = 0;
+        let map = Map::default();
         let mut terrain_materials = TerrainMaterials::default();
+        let hex_mesh = meshes.add(Extrusion::new(RegularPolygon::new(hex_size, 6), hex_thickness));
         let x_increment = 3.0_f32.sqrt() * hex_size;
         let y_increment = 1.5 * hex_size;
-        let (center_x, center_y) = compute_map_center(rows as u32, collumns as u32, hex_size);
+        let (center_x, center_y, map_width, map_height) = compute_map_center(map.rows as u32, map.collumns as u32, hex_size);
         
         map.hexes.iter().for_each(|hex| {
             let x = hex.position.1 as f32 * x_increment + 
@@ -49,39 +49,28 @@ impl MapModel {
                     ..default() 
                 },
             ));
-            idx += 1;
         });
 
-        commands.spawn((
-            PointLight {
-                shadows_enabled: true,
-                intensity: 10_000_000.,
-                range: 100.0,
-                shadow_depth_bias: 0.2,
-                ..default()
-            },
-            Transform::from_xyz(0.0, 0.0, 50.0),
-        ));
-
-        commands.spawn((
-            Camera3d::default(),
-            Transform::from_xyz(0.0, 0.0, 50.0).looking_at(Vec3::ZERO, Vec3::Y),
-        ));
-
-
-        MapModel {
+        Ok(MapModel {
             map,
+            map_width,
+            map_height,
             hex_mesh,
             terrain_materials,
             hex_size,
             hex_thickness,
-        }
+        })
     }
 }
 
-fn compute_map_center(rows: u32, cols: u32, hex_size: f32) -> (f32, f32) {
+fn compute_map_center(rows: u32, cols: u32, hex_size: f32) -> (f32, f32, f32, f32) {
     let dx = hex_size * f32::sqrt(3.0);
     let dy = hex_size * 1.5;
+
+    let mut min_x = f32::MAX;
+    let mut max_x = f32::MIN;
+    let mut min_y = f32::MAX;
+    let mut max_y = f32::MIN;
 
     let mut sum_x = 0.0;
     let mut sum_y = 0.0;
@@ -98,13 +87,20 @@ fn compute_map_center(rows: u32, cols: u32, hex_size: f32) -> (f32, f32) {
             sum_x += world_x;
             sum_y += world_y;
             count += 1.0;
+
+            min_x = min_x.min(world_x);
+            max_x = max_x.max(world_x);
+            min_y = min_y.min(world_y);
+            max_y = max_y.max(world_y);
         }
     }
 
     let center_x = sum_x / count;
     let center_y = sum_y / count;
+    let map_width = max_x - min_x + dx; // add one hex width
+    let map_height = max_y - min_y + dy; // add one hex height
 
-    (center_x, center_y)
+    (center_x, center_y, map_width, map_height)
 }
 
 #[derive(Resource, Default)]

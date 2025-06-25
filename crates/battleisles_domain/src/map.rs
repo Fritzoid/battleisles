@@ -83,6 +83,12 @@ impl Map {
     }
 }
 
+impl Default for Map {
+    fn default() -> Self {
+        Map::try_new(50, 50).unwrap()
+    }
+}
+
 #[cfg(test)]
 mod tests {
 
