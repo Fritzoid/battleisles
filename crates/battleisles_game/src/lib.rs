@@ -1,12 +1,10 @@
-use std::f32::consts::*;
 use bevy::prelude::*;
 use bevy::window::WindowMode;
 use bevy_egui::EguiPlugin;
-use bevy_color::palettes::basic::*;
-use bevy_panorbit_camera::{PanOrbitCamera, PanOrbitCameraPlugin};
-use battleisles_domain::map::Map;
-use battleisles_domain::hex::Terrain;
+use bevy::render::camera::{ScalingMode};
 
+mod map_model;
+use map_model::MapModel;
 mod ui;
 
 pub struct BattleIslesGame;
@@ -19,51 +17,32 @@ impl BattleIslesGame {
                     mode: WindowMode::Windowed,
                     title: "Battle Isles".to_owned(),
                     resolution: (800.0, 600.0).into(),
-                    resizable: false,
+                    resizable: true,
                     canvas: Some("#bevy".to_owned()),
                     ..default()
                 }),
                 ..default()
             }))
-            .add_plugins(PanOrbitCameraPlugin)
+            //.add_plugins(PanOrbitCameraPlugin)
             .add_plugins(EguiPlugin { enable_multipass_for_primary_context: false, })
             .add_systems(Startup, setup)
+            .add_systems(Update, update_camera_to_fit_map)
             .add_systems(Update, ui::ui_system)
             .run();
     }
 }
-
-const HEX_SIZE: f32 = 2.0;
-const HEX_THICKNESS: f32 = 0.01;
 
 fn setup(
     mut commands: Commands,
     mut meshes: ResMut<Assets<Mesh>>,
     mut materials: ResMut<Assets<StandardMaterial>>,
 ) {
-    let hex_mesh = meshes.add(Extrusion::new(RegularPolygon::new(HEX_SIZE, 6), HEX_THICKNESS));
-    let map = Map::try_new(1, 3).expect("Failed to create map");
-    let mut idx = 0;
-    let mut terrain_materials = TerrainMaterials::default();
-
-    let mut x = 0.0;
-    let y = 0.0;
-    let z = 0.0;
-    
-    map.hexes.iter().for_each(|hex| {
-        let material = terrain_materials.get_or_create(hex.terrain, materials.as_mut());
-        commands.spawn((
-            Mesh3d(hex_mesh.clone()),
-            MeshMaterial3d(material.clone()),
-            Transform { 
-                translation: Vec3::new(x, y, z), 
-                //rotation: Quat::from_rotation_x(FRAC_PI_2),
-                ..default() 
-            },
-        ));
-        idx += 1;
-        x += 3.0_f32.sqrt();
-    });
+    let map_model = MapModel::try_new(
+        &mut commands,
+        &mut meshes,
+        &mut materials,
+    ).expect("Failed to create map model");
+    commands.insert_resource(map_model);
 
     commands.spawn((
         PointLight {
@@ -73,38 +52,62 @@ fn setup(
             shadow_depth_bias: 0.2,
             ..default()
         },
-        Transform::from_xyz(0.0, 60.0, 0.0),
+        Transform::from_xyz(0.0, 0.0, 50.0),
     ));
-
     commands.spawn((
-        //Camera3d::default(),
-        Transform::from_xyz(0.0, 50.0, 0.0),
-        PanOrbitCamera::default(),
-    ));
+        Camera3d { ..default() },
+        Projection::Orthographic(OrthographicProjection {
+            scale: 1.0,
+            scaling_mode: bevy::render::camera::ScalingMode::Fixed { width: 800.0, height: 600.0 },
+            near: -1000.0,
+            far: 1000.0,
+            ..OrthographicProjection::default_3d()
+        }),
+        Transform::from_xyz(0.0, 0.0, 1000.0).looking_at(Vec3::ZERO, Vec3::Y),
+        GlobalTransform::default(),
+));
+  
+
 }
 
-use std::collections::HashMap;
+fn update_camera_to_fit_map(
+    mut query: Query<&mut Projection, With<Camera3d>>,
+    window_query: Query<&Window>,
+    map_model: Res<MapModel>,
+) {
+    let window = window_query.single().unwrap();
 
-#[derive(Resource, Default)]
-struct TerrainMaterials {
-    cache: HashMap<Terrain, Handle<StandardMaterial>>,
-}
+    let usable_w = window.resolution.physical_width() as f32
+        - 100.0
+        - 100.0;
+    let usable_h = window.resolution.physical_height() as f32
+        - 50.0
+        - 50.0;
 
-impl TerrainMaterials {
-    fn get_or_create(
-        &mut self,
-        terrain: Terrain,
-        materials: &mut Assets<StandardMaterial>,
-    ) -> Handle<StandardMaterial> {
-        self.cache.entry(terrain).or_insert_with(|| {
-            let color = match terrain {
-                Terrain::Plains => GREEN,
-                Terrain::Hills => OLIVE,
-                Terrain::Mountains => GRAY,
-                Terrain::DeepWater => BLUE,
-                Terrain::ShallowWater => AQUA,
+    let aspect_w = usable_w / usable_h;
+    let aspect_map = map_model.map_width / map_model.map_height;
+
+    let mut projection = query.single_mut().unwrap();
+
+    if let Projection::Orthographic(ref mut ortho) = *projection {
+        if aspect_w > aspect_map {
+            // Window is wider than map → fit height
+            let target_h = map_model.map_height;
+            let target_w = target_h * aspect_w;
+
+            ortho.scaling_mode = ScalingMode::Fixed {
+                width: target_w,
+                height: target_h,
             };
-            materials.add(StandardMaterial::from_color(color))
-        }).clone()
+        } else {
+            // Window is taller than map → fit width
+            let target_w = map_model.map_width;
+            let target_h = target_w / aspect_w;
+
+            ortho.scaling_mode = ScalingMode::Fixed {
+                width: target_w,
+                height: target_h,
+            };
+        }
     }
 }
