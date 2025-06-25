@@ -5,6 +5,8 @@ edition = "2021"
 
 [workspace]
 members = [
+    "crates/battleisles_bevy",
+    "crates/battleisles_editor",
     "crates/battleisles_domain",
     "crates/battleisles_game",
     "editor",

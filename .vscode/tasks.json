@@ -20,6 +20,31 @@
 				"isDefault": true
 			},
 			"problemMatcher": ["$rustc"]
+		},
+		{
+			"label": "build editor",
+			"type": "shell",
+			"command": "cargo build -p editor",
+			"group": "build",
+			"problemMatcher": ["$rustc"]
+		},
+		{
+			"label": "run editor",
+			"type": "shell",
+			"command": "cargo run -p editor",
+			"group": "test",
+			"problemMatcher": ["$rustc"]
+		},
+		{
+			"label": "build workspace",
+			"type": "shell",
+			"command": "cargo build --workspace",
+			"group": "build",
+			"problemMatcher": ["$rustc"],
+			"presentation": {
+				"reveal": "always",
+				"panel": "shared"
+			}
 		}
 	]
 }

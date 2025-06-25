@@ -4,5 +4,4 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-battleisles_domain = { path = "../crates/battleisles_domain", version = "0.1.0" }
-battleisles_game = { path = "../crates/battleisles_game", version = "0.1.0" }
+battleisles_editor = { path = "../crates/battleisles_editor", version = "0.1.0" }

@@ -1,3 +1,5 @@
+use battleisles_editor::BattleIslesEditor;
+
 fn main() {
-    print!("Hello, editor!");
+    BattleIslesEditor::run();
 }

@@ -6,9 +6,9 @@ use bevy::render::camera::{ScalingMode};
 use battleisles_bevy::map_model::MapModel;
 mod ui;
 
-pub struct BattleIslesGame;
+pub struct BattleIslesEditor;
 
-impl BattleIslesGame {
+impl BattleIslesEditor {
     pub fn run() {
         App::new()
             .add_plugins(DefaultPlugins.set(WindowPlugin {
@@ -22,7 +22,6 @@ impl BattleIslesGame {
                 }),
                 ..default()
             }))
-            //.add_plugins(PanOrbitCameraPlugin)
             .add_plugins(EguiPlugin { enable_multipass_for_primary_context: false, })
             .add_systems(Startup, setup)
             .add_systems(Update, update_camera_to_fit_map)
@@ -64,9 +63,7 @@ fn setup(
         }),
         Transform::from_xyz(0.0, 0.0, 1000.0).looking_at(Vec3::ZERO, Vec3::Y),
         GlobalTransform::default(),
-));
-  
-
+    ));
 }
 
 fn update_camera_to_fit_map(
