@@ -3,15 +3,10 @@
     {
         "type": "lldb",
         "request": "launch",
-        "name": "Cargo test",
-        "cargo": {
-            "args": [
-                "test",
-                "--no-run",
-                "--lib"
-            ]
-        },
-        "args": []
+        "name": "Launch",
+        "program": "${workspaceFolder}/target/debug/battleisles",
+        "args": [],
+        "cwd": "${workspaceFolder}"
     }
     ]
 }
