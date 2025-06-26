@@ -19,8 +19,14 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v2
 
-    - name: Build
-      run: cargo build --verbose
+    - name: Build debug
+      run: cargo build --verbose --workspace
 
-    - name: Run tests
-      run: cargo test --verbose
+    - name: Run tests debug
+      run: cargo test --verbose --workspace
+    
+    - name: Build release
+      run: cargo build --release --verbose --workspace 
+
+    - name: Run tests release
+      run: cargo test --release --verbose --workspace
