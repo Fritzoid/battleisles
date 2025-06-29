@@ -8,8 +8,10 @@ use battleisles_domain::hex::Terrain;
 #[derive(Resource)]
 pub struct MapModel {
     map: Map,
-    pub map_width: f32,
-    pub map_height: f32,
+    pub map_right: f32,
+    pub map_left: f32,
+    pub map_top: f32,
+    pub map_bottom: f32,
     hex_mesh: Handle<Mesh>,
     terrain_materials: TerrainMaterials,
     hex_size: f32,
@@ -29,7 +31,8 @@ impl MapModel {
         let hex_mesh = meshes.add(Extrusion::new(RegularPolygon::new(hex_size, 6), hex_thickness));
         let x_increment = 3.0_f32.sqrt() * hex_size;
         let y_increment = 1.5 * hex_size;
-        let (center_x, center_y, map_width, map_height) = compute_map_center(map.rows as u32, map.collumns as u32, hex_size);
+        let (center_x, center_y, map_top, map_bottom, map_left, map_right) 
+            = compute_map_specs(map.rows as u32, map.collumns as u32, hex_size);
         
         map.hexes.iter().for_each(|hex| {
             let x = hex.position.1 as f32 * x_increment + 
@@ -53,8 +56,10 @@ impl MapModel {
 
         Ok(MapModel {
             map,
-            map_width,
-            map_height,
+            map_right,
+            map_left,
+            map_top,
+            map_bottom,
             hex_mesh,
             terrain_materials,
             hex_size,
@@ -63,9 +68,13 @@ impl MapModel {
     }
 }
 
-fn compute_map_center(rows: u32, cols: u32, hex_size: f32) -> (f32, f32, f32, f32) {
-    let dx = hex_size * f32::sqrt(3.0);
-    let dy = hex_size * 1.5;
+fn compute_map_specs(
+    rows: u32,
+    cols: u32,
+    hex_size: f32,
+) -> (f32, f32, f32, f32, f32, f32) {
+    let dx = hex_size * f32::sqrt(3.0); // horizontal distance between columns
+    let dy = hex_size * 1.5;            // vertical distance between rows
 
     let mut min_x = f32::MAX;
     let mut max_x = f32::MIN;
@@ -97,10 +106,14 @@ fn compute_map_center(rows: u32, cols: u32, hex_size: f32) -> (f32, f32, f32, f3
 
     let center_x = sum_x / count;
     let center_y = sum_y / count;
-    let map_width = max_x - min_x + dx; // add one hex width
-    let map_height = max_y - min_y + dy; // add one hex height
 
-    (center_x, center_y, map_width, map_height)
+    // True bounding box (from outer hex edges)
+    let left   = min_x - dx / 2.0;
+    let right  = max_x + dx / 2.0;
+    let top    = max_y + hex_size;
+    let bottom = min_y - hex_size;
+
+    (center_x, center_y, top, bottom, left, right)
 }
 
 #[derive(Resource, Default)]

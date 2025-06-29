@@ -84,14 +84,16 @@ fn update_camera_to_fit_map(
         - 50.0;
 
     let aspect_w = usable_w / usable_h;
-    let aspect_map = map_model.map_width / map_model.map_height;
+    let map_width = map_model.map_right - map_model.map_left;
+    let map_height = map_model.map_top - map_model.map_bottom;
+    let aspect_map = map_width / map_height;
 
     let mut projection = query.single_mut().unwrap();
 
     if let Projection::Orthographic(ref mut ortho) = *projection {
         if aspect_w > aspect_map {
             // Window is wider than map → fit height
-            let target_h = map_model.map_height;
+            let target_h = map_height;
             let target_w = target_h * aspect_w;
 
             ortho.scaling_mode = ScalingMode::Fixed {
@@ -100,7 +102,7 @@ fn update_camera_to_fit_map(
             };
         } else {
             // Window is taller than map → fit width
-            let target_w = map_model.map_width;
+            let target_w = map_width;
             let target_h = target_w / aspect_w;
 
             ortho.scaling_mode = ScalingMode::Fixed {
