@@ -18,7 +18,7 @@ pub struct Hex {
 
 #[cfg(test)]
 mod tests {
-    use super::{Hex, Terrain, HexNeighbor};
+    use super::{Hex, HexNeighbor, Terrain};
 
     #[test]
     fn test_hex_creation() {
