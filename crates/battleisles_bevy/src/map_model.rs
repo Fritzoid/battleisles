@@ -1,10 +1,7 @@
-use battleisles_domain::hex::Terrain;
-use battleisles_domain::map::Map;
 use bevy::prelude::*;
-use bevy_color::palettes::basic::*;
-use std::collections::HashMap;
-use bevy::render::camera::{ScalingMode};
-
+use bevy::render::camera::{OrthographicProjection, Projection};
+use battleisles_domain::map::Map;
+use crate::terrain_materials::TerrainMaterials;
 
 #[derive(Resource)]
 pub struct MapModel {
@@ -23,13 +20,13 @@ pub struct MapModel {
 
 impl MapModel {
     pub fn try_new(
+        map: Map,
         commands: &mut Commands,
         meshes: &mut ResMut<Assets<Mesh>>,
         materials: &mut ResMut<Assets<StandardMaterial>>,
     ) -> Result<Self, bool> {
         let hex_size = 2.0;
         let hex_thickness = 0.01;
-        let map = Map::default();
         let mut terrain_materials = TerrainMaterials::default();
         let hex_mesh = meshes.add(Extrusion::new(
             RegularPolygon::new(hex_size, 6),
@@ -149,68 +146,4 @@ fn compute_map_specs(rows: u32, cols: u32, hex_size: f32) -> (f32, f32, f32, f32
     let bottom = min_y - hex_size;
 
     (center_x, center_y, top, bottom, left, right)
-}
-
-#[derive(Resource, Default)]
-struct TerrainMaterials {
-    cache: HashMap<Terrain, Handle<StandardMaterial>>,
-}
-
-impl TerrainMaterials {
-    fn get_or_create(
-        &mut self,
-        terrain: Terrain,
-        materials: &mut Assets<StandardMaterial>,
-    ) -> Handle<StandardMaterial> {
-        self.cache
-            .entry(terrain)
-            .or_insert_with(|| {
-                let color = match terrain {
-                    Terrain::Plains => GREEN,
-                    Terrain::Hills => OLIVE,
-                    Terrain::Mountains => GRAY,
-                    Terrain::DeepWater => BLUE,
-                    Terrain::ShallowWater => AQUA,
-                };
-                materials.add(StandardMaterial::from_color(color))
-            })
-            .clone()
-    }
-}
-
-pub fn update_camera_to_fit_map(
-    mut query: Query<&mut Projection, With<Camera3d>>,
-    window_query: Query<&Window>,
-    map_model: Res<MapModel>,
-) {
-    let window = window_query.single().unwrap();
-    let usable_w = window.resolution.physical_width() as f32 - 100.0 - 100.0;
-    let usable_h = window.resolution.physical_height() as f32 - 50.0 - 50.0;
-    let aspect_w = usable_w / usable_h;
-    let map_width = map_model.map_right - map_model.map_left;
-    let map_height = map_model.map_top - map_model.map_bottom;
-    let aspect_map = map_width / map_height;
-    let mut projection = query.single_mut().unwrap();
-
-    if let Projection::Orthographic(ref mut ortho) = *projection {
-        if aspect_w > aspect_map {
-            // Window is wider than map → fit height
-            let target_h = map_height;
-            let target_w = target_h * aspect_w;
-
-            ortho.scaling_mode = ScalingMode::Fixed {
-                width: target_w,
-                height: target_h,
-            };
-        } else {
-            // Window is taller than map → fit width
-            let target_w = map_width;
-            let target_h = target_w / aspect_w;
-
-            ortho.scaling_mode = ScalingMode::Fixed {
-                width: target_w,
-                height: target_h,
-            };
-        }
-    }
 }

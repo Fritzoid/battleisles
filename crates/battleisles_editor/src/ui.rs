@@ -1,13 +1,35 @@
 use bevy_egui::{egui, EguiContexts};
+use bevy::prelude::*;
+use crate::GenerateMapEvent;
 
-pub fn ui_system(mut contexts: EguiContexts) {
+#[derive(Resource, Default)]
+pub struct UiState {
+    pub map_width: String,
+    pub map_height: String,
+}
+
+pub fn ui_system(
+    mut contexts: EguiContexts,
+    mut ui_state: ResMut<UiState>,
+    mut map_events: EventWriter<GenerateMapEvent>,
+) {
     let ctx = contexts.ctx_mut();
 
     // Top panel
     egui::TopBottomPanel::top("top_panel")
         .default_height(50.0)
         .show(ctx, |ui| {
-            ui.add(egui::Label::new("Top Panel"));
+            ui.horizontal(|ui| {
+                ui.label("Map Width:");
+                ui.add(egui::TextEdit::singleline(&mut ui_state.map_width).hint_text("Width").desired_width(60.0));
+                ui.label("Map Height:");
+                ui.add(egui::TextEdit::singleline(&mut ui_state.map_height).hint_text("Height").desired_width(60.0));
+                if ui.add(egui::Button::new("Generate Map")).clicked() {
+                    if let (Ok(width), Ok(height)) = (ui_state.map_width.parse::<u32>(), ui_state.map_height.parse::<u32>()) {
+                        map_events.write(GenerateMapEvent { width, height });
+                    }
+                }
+            });
         });
 
     // Bottom panel

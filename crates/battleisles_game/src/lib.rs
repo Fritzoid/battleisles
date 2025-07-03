@@ -1,7 +1,8 @@
 use bevy::prelude::*;
-use bevy::window::{WindowMode, WindowResized};
+use bevy::window::WindowMode;
 use bevy_egui::EguiPlugin;
-use battleisles_bevy::map_model::*;
+use battleisles_bevy::map_model_plugin::MapModelPlugin;
+use battleisles_domain::map::Map;
 
 mod ui;
 
@@ -22,22 +23,23 @@ impl BattleIslesGame {
                 ..default()
             }))
             .add_plugins(EguiPlugin { enable_multipass_for_primary_context: false, })
+            .add_plugins(MapModelPlugin)
             .add_systems(Startup, setup)
-            .add_systems(Update, update_camera_to_fit_map.run_if(on_event::<WindowResized>))
             .add_systems(Update, ui::ui_system)
             .run();
     }
 }
 
-fn setup(
+pub fn setup(
     mut commands: Commands,
     mut meshes: ResMut<Assets<Mesh>>,
     mut materials: ResMut<Assets<StandardMaterial>>,
 ) {
-    let map_model = MapModel::try_new(
+    // Initialize any resources or entities needed for the editor
+    MapModelPlugin::initialize_map(
+        Map::default(),
         &mut commands,
-        &mut meshes,
+        &mut meshes, 
         &mut materials,
-    ).expect("Failed to create map model");
-    commands.insert_resource(map_model);
+    ).expect("Failed to initialize map model");
 }
