@@ -3,8 +3,16 @@
     {
         "type": "lldb",
         "request": "launch",
-        "name": "Launch",
+        "name": "Launch battleisles",
         "program": "${workspaceFolder}/target/debug/battleisles",
+        "args": [],
+        "cwd": "${workspaceFolder}"
+    },
+    {
+        "type": "lldb",
+        "request": "launch",
+        "name": "Launch editor",
+        "program": "${workspaceFolder}/target/debug/editor",
         "args": [],
         "cwd": "${workspaceFolder}"
     }
