@@ -2,7 +2,7 @@ use bevy::prelude::*;
 use bevy::window::{WindowMode, WindowResized};
 use bevy_egui::EguiPlugin;
 use battleisles_bevy::map_model_plugin::MapModelPlugin;
-use battleisles_domain::map::Map;
+use battleisles_domain::hex_map::HexMap;
 
 mod ui;
 
@@ -61,7 +61,7 @@ fn handle_generate_map_event(
     for event in events.read() {
         println!("Generating map with dimensions: {}x{}", event.width, event.height);
         
-        let map = Map::try_new(event.height as usize, event.width as usize).unwrap();
+        let map = HexMap::new();
         
         // Call the MapModelPlugin's initialize_map method
         match MapModelPlugin::initialize_map(

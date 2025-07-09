@@ -2,7 +2,7 @@ use bevy::prelude::*;
 use bevy::window::WindowMode;
 use bevy_egui::EguiPlugin;
 use battleisles_bevy::map_model_plugin::MapModelPlugin;
-use battleisles_domain::map::Map;
+use battleisles_domain::hex_map::HexMap;
 
 mod ui;
 
@@ -37,7 +37,7 @@ pub fn setup(
 ) {
     // Initialize any resources or entities needed for the editor
     MapModelPlugin::initialize_map(
-        Map::default(),
+        HexMap::new(),
         &mut commands,
         &mut meshes, 
         &mut materials,

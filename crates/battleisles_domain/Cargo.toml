@@ -5,4 +5,5 @@ edition = "2021"
 
 [dependencies]
 rstest = "0.25.0"
+hexx = "0.21.0"
 
