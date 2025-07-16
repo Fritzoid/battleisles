@@ -7,3 +7,6 @@ edition = "2021"
 rstest = "0.25.0"
 hexx = "0.21.0"
 
+[profile.dev]
+debug = 2
+
