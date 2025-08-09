@@ -43,6 +43,7 @@ impl BattleIslesEditor {
                 Update,
                 (
                     ui::ui_system,
+                    ui::paint_click_system,
                     handle_generate_map_event,
                     handle_map_changed_event,
                 ),
