@@ -1,8 +1,8 @@
+use battleisles_bevy::map_model_plugin::MapModelPlugin;
+use battleisles_domain::map::Map;
 use bevy::prelude::*;
 use bevy::window::WindowMode;
 use bevy_egui::EguiPlugin;
-use battleisles_bevy::map_model_plugin::MapModelPlugin;
-use battleisles_domain::hex_map::HexMap;
 
 mod ui;
 
@@ -22,7 +22,9 @@ impl BattleIslesGame {
                 }),
                 ..default()
             }))
-            .add_plugins(EguiPlugin { enable_multipass_for_primary_context: false, })
+            .add_plugins(EguiPlugin {
+                enable_multipass_for_primary_context: false,
+            })
             .add_plugins(MapModelPlugin)
             .add_systems(Startup, setup)
             .add_systems(Update, ui::ui_system)
@@ -36,10 +38,11 @@ pub fn setup(
     mut materials: ResMut<Assets<StandardMaterial>>,
 ) {
     // Initialize any resources or entities needed for the editor
-    MapModelPlugin::initialize_map(
-        HexMap::new(),
+    MapModelPlugin::initialize_map_model(
+        Map::new(5, 5),
         &mut commands,
-        &mut meshes, 
+        &mut meshes,
         &mut materials,
-    ).expect("Failed to initialize map model");
+    )
+    .expect("Failed to initialize map model");
 }

@@ -1,6 +1,6 @@
-use bevy_egui::{egui, EguiContexts};
-use bevy::prelude::*;
 use crate::GenerateMapEvent;
+use bevy::prelude::*;
+use bevy_egui::{egui, EguiContexts};
 
 #[derive(Resource, Default)]
 pub struct UiState {
@@ -21,11 +21,22 @@ pub fn ui_system(
         .show(ctx, |ui| {
             ui.horizontal(|ui| {
                 ui.label("Map Width:");
-                ui.add(egui::TextEdit::singleline(&mut ui_state.map_width).hint_text("Width").desired_width(60.0));
+                ui.add(
+                    egui::TextEdit::singleline(&mut ui_state.map_width)
+                        .hint_text("Width")
+                        .desired_width(60.0),
+                );
                 ui.label("Map Height:");
-                ui.add(egui::TextEdit::singleline(&mut ui_state.map_height).hint_text("Height").desired_width(60.0));
+                ui.add(
+                    egui::TextEdit::singleline(&mut ui_state.map_height)
+                        .hint_text("Height")
+                        .desired_width(60.0),
+                );
                 if ui.add(egui::Button::new("Generate Map")).clicked() {
-                    if let (Ok(width), Ok(height)) = (ui_state.map_width.parse::<u32>(), ui_state.map_height.parse::<u32>()) {
+                    if let (Ok(width), Ok(height)) = (
+                        ui_state.map_width.parse::<u32>(),
+                        ui_state.map_height.parse::<u32>(),
+                    ) {
                         map_events.write(GenerateMapEvent { width, height });
                     }
                 }

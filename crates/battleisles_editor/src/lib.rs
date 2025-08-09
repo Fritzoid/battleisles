@@ -1,8 +1,8 @@
+use battleisles_bevy::map_model_plugin::MapModelPlugin;
+use battleisles_domain::map::Map;
 use bevy::prelude::*;
 use bevy::window::{WindowMode, WindowResized};
 use bevy_egui::EguiPlugin;
-use battleisles_bevy::map_model_plugin::MapModelPlugin;
-use battleisles_domain::hex_map::HexMap;
 
 mod ui;
 
@@ -39,14 +39,19 @@ impl BattleIslesEditor {
             })
             .add_plugins(MapModelPlugin)
             .add_systems(Startup, setup)
-            .add_systems(Update, (ui::ui_system, handle_generate_map_event, handle_map_changed_event))
+            .add_systems(
+                Update,
+                (
+                    ui::ui_system,
+                    handle_generate_map_event,
+                    handle_map_changed_event,
+                ),
+            )
             .run();
     }
 }
 
-pub fn setup(
-    mut commands: Commands,
-) {
+pub fn setup(mut commands: Commands) {
     // Initialize any resources or entities needed for the editor
     commands.insert_resource(ui::UiState::default());
 }
@@ -59,22 +64,20 @@ fn handle_generate_map_event(
     mut map_changed_events: EventWriter<MapChangedEvent>,
 ) {
     for event in events.read() {
-        println!("Generating map with dimensions: {}x{}", event.width, event.height);
-        
-        let map = HexMap::new();
-        
-        // Call the MapModelPlugin's initialize_map method
-        match MapModelPlugin::initialize_map(
-            map,
-            &mut commands,
-            &mut meshes,
-            &mut materials,
-        ) {
+        println!(
+            "Generating map with dimensions: {}x{}",
+            event.width, event.height
+        );
+
+        let map = Map::new(event.width, event.height);
+
+        match MapModelPlugin::initialize_map_model(map, &mut commands, &mut meshes, &mut materials)
+        {
             Ok(_) => {
                 println!("Map generated successfully");
                 // Send MapChangedEvent to trigger camera update
                 map_changed_events.write(MapChangedEvent);
-            },
+            }
             Err(e) => println!("Failed to generate map: {:?}", e),
         }
     }

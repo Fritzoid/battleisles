@@ -1,11 +1,11 @@
+use crate::terrain_materials::TerrainMaterials;
+use battleisles_domain::map::Map;
 use bevy::prelude::*;
 use bevy::render::camera::{OrthographicProjection, Projection};
-use battleisles_domain::hex_map::HexMap;
-use crate::terrain_materials::TerrainMaterials;
 
 #[derive(Resource)]
 pub struct MapModel {
-    map: HexMap,
+    map: Map,
     hex_mesh: Handle<Mesh>,
     terrain_materials: TerrainMaterials,
     light: Entity,
@@ -14,20 +14,37 @@ pub struct MapModel {
 
 impl MapModel {
     pub fn try_new(
-        map: HexMap,
+        map: Map,
         commands: &mut Commands,
         meshes: &mut ResMut<Assets<Mesh>>,
         materials: &mut ResMut<Assets<StandardMaterial>>,
     ) -> Result<Self, bool> {
         let mut terrain_materials = TerrainMaterials::default();
-        let hex_mesh = meshes.add(Extrusion::new(
-            RegularPolygon::new(map.hex_size(), 6), 0.1,
-        ));
+        let hex_mesh = meshes.add(Extrusion::new(RegularPolygon::new(map.hex_size(), 6), 0.1));
 
-        map.hexes.iter().for_each(|hex| {
-            let (x, y) = map.hex_to_world_pos(hex);
-            let material = 
-                terrain_materials.get_or_create(hex.terrain, materials.as_mut());
+        // Compute bounds to center the map and flip Y so row 0 is at the top
+        let mut min_x = f32::INFINITY;
+        let mut max_x = f32::NEG_INFINITY;
+        let mut min_y = f32::INFINITY;
+        let mut max_y = f32::NEG_INFINITY;
+
+        for tile in &map.tiles {
+            let (x_raw, y_raw) = map.tile_to_world_pos(tile);
+            let x = x_raw;
+            let y = -y_raw; // flip Y so r=0 is at the top
+            if x < min_x { min_x = x; }
+            if x > max_x { max_x = x; }
+            if y < min_y { min_y = y; }
+            if y > max_y { max_y = y; }
+        }
+
+        let center = ((min_x + max_x) * 0.5, (min_y + max_y) * 0.5);
+
+        for tile in &map.tiles {
+            let (x_raw, y_raw) = map.tile_to_world_pos(tile);
+            let x = x_raw - center.0;
+            let y = -y_raw - center.1; // flip Y and center
+            let material = terrain_materials.get_or_create(tile.terrain, materials.as_mut());
             commands.spawn((
                 Mesh3d(hex_mesh.clone()),
                 MeshMaterial3d(material.clone()),
@@ -36,7 +53,7 @@ impl MapModel {
                     ..default()
                 },
             ));
-        });
+        }
 
         let light_entity = commands
             .spawn((

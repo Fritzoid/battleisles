@@ -1,7 +1,7 @@
-use std::collections::HashMap;
+use battleisles_domain::map::Terrain;
 use bevy::prelude::*;
 use bevy_color::palettes::basic::*;
-use battleisles_domain::hex_map::Terrain;
+use std::collections::HashMap;
 
 #[derive(Resource, Default)]
 pub struct TerrainMaterials {

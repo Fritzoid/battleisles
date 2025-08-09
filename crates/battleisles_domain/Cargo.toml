@@ -4,7 +4,7 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-rstest = "0.25.0"
+rstest = "0.26.1"
 hexx = "0.21.0"
 
 [profile.dev]
