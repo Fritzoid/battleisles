@@ -6,13 +6,13 @@ use bevy_egui::EguiPlugin;
 
 mod ui;
 
-#[derive(Event)]
+#[derive(Message, Event)]
 pub struct GenerateMapEvent {
     pub width: u32,
     pub height: u32,
 }
 
-#[derive(Event)]
+#[derive(Message, Event)]
 pub struct MapChangedEvent;
 
 pub struct BattleIslesEditor;
@@ -21,22 +21,20 @@ impl BattleIslesEditor {
     pub fn run() {
         App::new()
             .init_resource::<ui::UiState>()
-            .add_event::<GenerateMapEvent>()
-            .add_event::<MapChangedEvent>()
+            .add_message::<GenerateMapEvent>()
+            .add_message::<MapChangedEvent>()
             .add_plugins(DefaultPlugins.set(WindowPlugin {
                 primary_window: Some(Window {
                     mode: WindowMode::Windowed,
                     title: "Battle Isles".to_owned(),
-                    resolution: (800.0, 600.0).into(),
+                    resolution: (800, 600).into(),
                     resizable: true,
                     canvas: Some("#bevy".to_owned()),
                     ..default()
                 }),
                 ..default()
             }))
-            .add_plugins(EguiPlugin {
-                enable_multipass_for_primary_context: false,
-            })
+            .add_plugins(EguiPlugin::default())
             .add_plugins(MapModelPlugin)
             .add_systems(Startup, setup)
             .add_systems(
@@ -58,11 +56,11 @@ pub fn setup(mut commands: Commands) {
 }
 
 fn handle_generate_map_event(
-    mut events: EventReader<GenerateMapEvent>,
+    mut events: MessageReader<GenerateMapEvent>,
     mut commands: Commands,
     mut meshes: ResMut<Assets<Mesh>>,
     mut materials: ResMut<Assets<StandardMaterial>>,
-    mut map_changed_events: EventWriter<MapChangedEvent>,
+    mut map_changed_events: MessageWriter<MapChangedEvent>,
 ) {
     for event in events.read() {
         println!(
@@ -85,8 +83,8 @@ fn handle_generate_map_event(
 }
 
 fn handle_map_changed_event(
-    mut events: EventReader<MapChangedEvent>,
-    mut window_events: EventWriter<WindowResized>,
+    mut events: MessageReader<MapChangedEvent>,
+    mut window_events: MessageWriter<WindowResized>,
     window_query: Query<(Entity, &Window)>,
 ) {
     for _event in events.read() {
