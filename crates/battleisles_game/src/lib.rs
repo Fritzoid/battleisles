@@ -15,14 +15,16 @@ impl BattleIslesGame {
                 primary_window: Some(Window {
                     mode: WindowMode::Windowed,
                     title: "Battle Isles".to_owned(),
-                    resolution: (800, 600).into(),
+                    resolution: (800.0, 600.0).into(),
                     resizable: true,
                     canvas: Some("#bevy".to_owned()),
                     ..default()
                 }),
                 ..default()
             }))
-            .add_plugins(EguiPlugin::default())
+            .add_plugins(EguiPlugin {
+                enable_multipass_for_primary_context: false,
+            })
             .add_plugins(MapModelPlugin)
             .add_systems(Startup, setup)
             .add_systems(Update, ui::ui_system)

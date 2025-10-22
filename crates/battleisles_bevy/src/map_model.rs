@@ -1,7 +1,7 @@
 use crate::terrain_materials::TerrainMaterials;
 use battleisles_domain::map::Map;
 use bevy::prelude::*;
-use bevy_camera::{OrthographicProjection, Projection, ScalingMode};
+use bevy::render::camera::{OrthographicProjection, Projection};
 
 #[derive(Component, Clone, Copy)]
 pub struct TileIndex(pub usize);
@@ -82,7 +82,7 @@ impl MapModel {
                 Camera3d { ..default() },
                 Projection::Orthographic(OrthographicProjection {
                     scale: 0.1,
-                    scaling_mode: ScalingMode::Fixed {
+                    scaling_mode: bevy::render::camera::ScalingMode::Fixed {
                         width: 800.0,
                         height: 600.0,
                     },
