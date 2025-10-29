@@ -19,9 +19,9 @@ pub fn paint_click_system(
     windows: Query<&Window>,
     q_camera: Query<(&Camera, &GlobalTransform)>,
     ui_state: Res<UiState>,
-    mut paint_events: EventWriter<ApplyTerrainAt>,
+    mut paint_events: MessageWriter<ApplyTerrainAt>,
 ) {
-    let ctx = contexts.ctx_mut();
+    let Ok(ctx) = contexts.ctx_mut() else { return; };
     if ctx.wants_pointer_input() {
         return;
     }
@@ -49,9 +49,10 @@ pub fn paint_click_system(
 pub fn ui_system(
     mut contexts: EguiContexts,
     mut ui_state: ResMut<UiState>,
-    mut map_events: EventWriter<GenerateMapEvent>,
+    mut map_events: MessageWriter<GenerateMapEvent>,
 ) {
-    let ctx = contexts.ctx_mut();
+    println!("Running UI system");
+    let Ok(ctx) = contexts.ctx_mut() else { println!("Failed to get context"); return; };
 
     // Top panel
     egui::TopBottomPanel::top("top_panel")

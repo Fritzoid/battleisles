@@ -1,7 +1,7 @@
 use bevy_egui::{egui, EguiContexts};
 
 pub fn ui_system(mut contexts: EguiContexts) {
-    let ctx = contexts.ctx_mut();
+    let Ok(ctx) = contexts.ctx_mut() else { return; };
 
     // Top panel
     egui::TopBottomPanel::top("top_panel")

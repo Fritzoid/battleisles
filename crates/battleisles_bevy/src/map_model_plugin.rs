@@ -6,7 +6,7 @@ use crate::map_model::MapModel;
 
 impl Plugin for MapModelPlugin {
     fn build(&self, app: &mut App) {
-        app.add_event::<ApplyTerrainAt>()
+        app.add_message::<ApplyTerrainAt>()
             .add_systems(Update, handle_apply_terrain_at);
     }
 }
@@ -25,7 +25,7 @@ impl MapModelPlugin {
 }
 
 // Event sent by the editor when the user clicks in the viewport to paint a terrain
-#[derive(Event, Clone, Copy, Debug)]
+#[derive(Message, Event, Clone, Copy, Debug)]
 pub struct ApplyTerrainAt {
     pub world_pos: Vec2,    // world coords in the main XY plane (already centered)
     pub terrain: battleisles_domain::map::Terrain,
