@@ -3,6 +3,7 @@ FROM rust:latest
 RUN apt update && apt upgrade -y
 RUN apt-get install -y libasound2-dev
 RUN apt-get install -y libudev-dev
+RUN apt-get install -y libwayland-dev
 
 # Set the working directory inside the container
 #WORKDIR /usr/src/myapp
