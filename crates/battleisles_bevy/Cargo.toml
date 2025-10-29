@@ -8,6 +8,5 @@ battleisles_domain = { path = "../battleisles_domain", version = "0.1.0" }
 getrandom = { version = "0.3", features = ["wasm_js"] }
 bevy = "0.17.2"
 bevy_color = "0.17.2"
-bevy_camera = "0.17.2"
 bevy_egui = "0.38.0"
 

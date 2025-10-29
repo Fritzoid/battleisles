@@ -27,7 +27,7 @@ impl MapModelPlugin {
 // Event sent by the editor when the user clicks in the viewport to paint a terrain
 #[derive(Message, Event, Clone, Copy, Debug)]
 pub struct ApplyTerrainAt {
-    pub world_pos: Vec2,    // world coords in the main XY plane (already centered)
+    pub world_pos: Vec2, // world coords in the main XY plane (already centered)
     pub terrain: battleisles_domain::map::Terrain,
 }
 
@@ -37,7 +37,9 @@ fn handle_apply_terrain_at(
     mut materials: ResMut<Assets<StandardMaterial>>,
     mut commands: Commands,
 ) {
-    let Some(mut map_model) = map_model else { return; };
+    let Some(mut map_model) = map_model else {
+        return;
+    };
     for ApplyTerrainAt { world_pos, terrain } in ev.read().copied() {
         if let Some((idx, _entity)) = map_model.find_nearest_tile_entity(world_pos) {
             map_model.set_tile_terrain(idx, terrain, &mut materials, &mut commands);

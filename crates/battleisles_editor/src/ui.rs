@@ -1,8 +1,8 @@
 use crate::GenerateMapEvent;
 use battleisles_bevy::map_model_plugin::ApplyTerrainAt;
 use battleisles_domain::map::Terrain;
-use bevy::prelude::*;
 use bevy::input::ButtonInput;
+use bevy::prelude::*;
 use bevy_egui::{egui, EguiContexts};
 
 #[derive(Resource)]
@@ -21,7 +21,9 @@ pub fn paint_click_system(
     ui_state: Res<UiState>,
     mut paint_events: MessageWriter<ApplyTerrainAt>,
 ) {
-    let Ok(ctx) = contexts.ctx_mut() else { return; };
+    let Ok(ctx) = contexts.ctx_mut() else {
+        return;
+    };
     if ctx.wants_pointer_input() {
         return;
     }
@@ -37,7 +39,9 @@ pub fn paint_click_system(
         Ok(v) => v,
         Err(_) => return,
     };
-    let Some(cursor_pos) = window.cursor_position() else { return; };
+    let Some(cursor_pos) = window.cursor_position() else {
+        return;
+    };
     if let Ok(world) = camera.viewport_to_world_2d(camera_transform, cursor_pos) {
         paint_events.write(ApplyTerrainAt {
             world_pos: world,
@@ -51,8 +55,10 @@ pub fn ui_system(
     mut ui_state: ResMut<UiState>,
     mut map_events: MessageWriter<GenerateMapEvent>,
 ) {
-    println!("Running UI system");
-    let Ok(ctx) = contexts.ctx_mut() else { println!("Failed to get context"); return; };
+    let Ok(ctx) = contexts.ctx_mut() else {
+        println!("Failed to get context");
+        return;
+    };
 
     // Top panel
     egui::TopBottomPanel::top("top_panel")
@@ -114,7 +120,11 @@ pub fn ui_system(
 
 impl Default for UiState {
     fn default() -> Self {
-        Self { map_width: String::new(), map_height: String::new(), selected_terrain: Terrain::Plains }
+        Self {
+            map_width: String::new(),
+            map_height: String::new(),
+            selected_terrain: Terrain::Plains,
+        }
     }
 }
 
@@ -131,7 +141,7 @@ fn terrain_palette(ui: &mut egui::Ui, selected: &mut Terrain) {
     for (terrain, color, label) in items {
         let size = egui::vec2(40.0, 40.0);
         let (id, rect) = ui.allocate_space(size);
-    let stroke = egui::Stroke::new(2.0, egui::Color32::BLACK);
+        let stroke = egui::Stroke::new(2.0, egui::Color32::BLACK);
         let fill = egui::Color32::from_rgb(
             (color.red * 255.0) as u8,
             (color.green * 255.0) as u8,
@@ -145,10 +155,16 @@ fn terrain_palette(ui: &mut egui::Ui, selected: &mut Terrain) {
             points.push(center + egui::vec2(a.cos() * r, a.sin() * r));
         }
         let painter = ui.painter_at(rect);
-        painter.add(egui::epaint::PathShape::convex_polygon(points.clone(), fill, stroke));
+        painter.add(egui::epaint::PathShape::convex_polygon(
+            points.clone(),
+            fill,
+            stroke,
+        ));
         let is_selected = *selected == terrain;
         let resp = ui.interact(rect, id, egui::Sense::click());
-        if resp.clicked() { *selected = terrain; }
+        if resp.clicked() {
+            *selected = terrain;
+        }
         ui.label(label);
         if is_selected {
             let sel_stroke = egui::Stroke::new(2.0, egui::Color32::YELLOW);
@@ -161,4 +177,3 @@ fn terrain_palette(ui: &mut egui::Ui, selected: &mut Terrain) {
         ui.add_space(4.0);
     }
 }
-

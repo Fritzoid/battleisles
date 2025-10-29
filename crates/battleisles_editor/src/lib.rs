@@ -2,6 +2,7 @@ use battleisles_bevy::map_model_plugin::MapModelPlugin;
 use battleisles_domain::map::Map;
 use bevy::prelude::*;
 use bevy::window::{WindowMode, WindowResized};
+use bevy_camera::{OrthographicProjection, Projection, ScalingMode};
 use bevy_egui::{EguiPlugin, EguiPrimaryContextPass};
 
 mod ui;
@@ -38,22 +39,35 @@ impl BattleIslesEditor {
             .add_plugins(EguiPlugin::default())
             .add_systems(Startup, setup)
             .add_systems(
-                Update,
-                (
-                    handle_generate_map_event,
-                    handle_map_changed_event,
-                ),
+                EguiPrimaryContextPass,
+                (ui::ui_system, ui::paint_click_system),
             )
-            .add_systems(EguiPrimaryContextPass, 
-                (ui::ui_system, ui::paint_click_system)
+            .add_systems(
+                Update,
+                (handle_generate_map_event, handle_map_changed_event),
             )
             .run();
     }
 }
 
-pub fn setup(mut commands: Commands, ) {
+pub fn setup(mut commands: Commands) {
     // Initialize any resources or entities needed for the editor
     commands.insert_resource(ui::UiState::default());
+    commands.spawn((
+        Camera3d { ..default() },
+        Projection::Orthographic(OrthographicProjection {
+            scale: 0.1,
+            scaling_mode: ScalingMode::Fixed {
+                width: 800.0,
+                height: 600.0,
+            },
+            near: -1000.0,
+            far: 1000.0,
+            ..OrthographicProjection::default_3d()
+        }),
+        Transform::from_xyz(0.0, 0.0, 1000.0).looking_at(Vec3::ZERO, Vec3::Y),
+        GlobalTransform::default(),
+    ));
 }
 
 fn handle_generate_map_event(

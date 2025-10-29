@@ -1,7 +1,6 @@
 use crate::terrain_materials::TerrainMaterials;
 use battleisles_domain::map::Map;
 use bevy::prelude::*;
-use bevy_camera::{OrthographicProjection, Projection, ScalingMode};
 
 #[derive(Component, Clone, Copy)]
 pub struct TileIndex(pub usize);
@@ -12,7 +11,6 @@ pub struct MapModel {
     hex_mesh: Handle<Mesh>,
     terrain_materials: TerrainMaterials,
     light: Entity,
-    camera: Entity,
     tile_entities: Vec<Entity>,
 }
 
@@ -36,10 +34,18 @@ impl MapModel {
             let (x_raw, y_raw) = map.tile_to_world_pos(tile);
             let x = x_raw;
             let y = -y_raw; // flip Y so r=0 is at the top
-            if x < min_x { min_x = x; }
-            if x > max_x { max_x = x; }
-            if y < min_y { min_y = y; }
-            if y > max_y { max_y = y; }
+            if x < min_x {
+                min_x = x;
+            }
+            if x > max_x {
+                max_x = x;
+            }
+            if y < min_y {
+                min_y = y;
+            }
+            if y > max_y {
+                max_y = y;
+            }
         }
 
         let center = ((min_x + max_x) * 0.5, (min_y + max_y) * 0.5);
@@ -77,30 +83,11 @@ impl MapModel {
             ))
             .id();
 
-        let camera_id = commands
-            .spawn((
-                Camera3d { ..default() },
-                Projection::Orthographic(OrthographicProjection {
-                    scale: 0.1,
-                    scaling_mode: ScalingMode::Fixed {
-                        width: 800.0,
-                        height: 600.0,
-                    },
-                    near: -1000.0,
-                    far: 1000.0,
-                    ..OrthographicProjection::default_3d()
-                }),
-                Transform::from_xyz(0.0, 0.0, 1000.0).looking_at(Vec3::ZERO, Vec3::Y),
-                GlobalTransform::default(),
-            ))
-            .id();
-
         Ok(MapModel {
             map,
             hex_mesh,
             terrain_materials,
             light: light_entity,
-            camera: camera_id,
             tile_entities,
         })
     }
@@ -113,10 +100,18 @@ impl MapModel {
         for t in &self.map.tiles {
             let (x, y_raw) = self.map.tile_to_world_pos(t);
             let y = -y_raw;
-            if x < min_x { min_x = x; }
-            if x > max_x { max_x = x; }
-            if y < min_y { min_y = y; }
-            if y > max_y { max_y = y; }
+            if x < min_x {
+                min_x = x;
+            }
+            if x > max_x {
+                max_x = x;
+            }
+            if y < min_y {
+                min_y = y;
+            }
+            if y > max_y {
+                max_y = y;
+            }
         }
         ((min_x + max_x) * 0.5, (min_y + max_y) * 0.5)
     }
