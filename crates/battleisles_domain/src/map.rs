@@ -51,12 +51,16 @@ impl Map {
                 terrain: Terrain::DeepWater,
             })
             .collect::<Vec<Tile>>();
-    Map { hex_size, layout, tiles }
+        Map {
+            hex_size,
+            layout,
+            tiles,
+        }
     }
 
     pub fn tile_to_world_pos(&self, tile: &Tile) -> (f32, f32) {
-    let pos = self.layout.hex_to_world_pos(tile.position);
-    (pos.x as f32, pos.y as f32)
+        let pos = self.layout.hex_to_world_pos(tile.position);
+        (pos.x as f32, pos.y as f32)
     }
 
     pub fn hex_size(&self) -> f32 {
