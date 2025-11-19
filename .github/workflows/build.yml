@@ -15,12 +15,11 @@ jobs:
 
     container:
       image: fritzoid/rust-bevy-builder:latest
-      options: --clean
 
     steps:
     - name: Cleanup
       uses: FraBle/clean-after-action@v1
-      
+
     - name: Checkout code
       uses: actions/checkout@v4
 
