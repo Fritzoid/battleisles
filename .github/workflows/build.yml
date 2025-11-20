@@ -17,7 +17,10 @@ jobs:
 
     container:
       image: ghcr.io/rustgames/rust-bevy-builder:5ef674027eee2d12e8a880508477b116efac2fb0
-#      image: fritzoid/rust-bevy-builder:latest
+      credentials:
+        username: ${{ github.actor }}
+        password: ${{ secrets.GITHUB_TOKEN }}
+        #      image: fritzoid/rust-bevy-builder:latest
 
     steps:
     - name: Cleanup
