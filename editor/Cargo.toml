@@ -4,4 +4,4 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-battleisles_editor = { path = "../crates/battleisles_editor", version = "0.1.0" }
+battleisles_editor = { workspace = true }

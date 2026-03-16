@@ -2,15 +2,10 @@ use crate::terrain_materials::TerrainMaterials;
 use battleisles_domain::map::Map;
 use bevy::prelude::*;
 
-#[derive(Component, Clone, Copy)]
-pub struct TileIndex(pub usize);
-
 #[derive(Resource)]
 pub struct MapModel {
     map: Map,
-    hex_mesh: Handle<Mesh>,
     terrain_materials: TerrainMaterials,
-    light: Entity,
     tile_entities: Vec<Entity>,
 }
 
@@ -51,7 +46,7 @@ impl MapModel {
         let center = ((min_x + max_x) * 0.5, (min_y + max_y) * 0.5);
 
         let mut tile_entities = Vec::with_capacity(map.tiles.len());
-        for (i, tile) in map.tiles.iter().enumerate() {
+        for tile in &map.tiles {
             let (x_raw, y_raw) = map.tile_to_world_pos(tile);
             let x = x_raw - center.0;
             let y = -y_raw - center.1; // flip Y and center
@@ -64,30 +59,25 @@ impl MapModel {
                         translation: Vec3::new(x, y, 0.0),
                         ..default()
                     },
-                    TileIndex(i),
                 ))
                 .id();
             tile_entities.push(entity);
         }
 
-        let light_entity = commands
-            .spawn((
-                PointLight {
-                    shadows_enabled: true,
-                    intensity: 10_000_000.,
-                    range: 100.0,
-                    shadow_depth_bias: 0.2,
-                    ..default()
-                },
-                Transform::from_xyz(0.0, 0.0, 50.0),
-            ))
-            .id();
+        commands.spawn((
+            PointLight {
+                shadows_enabled: true,
+                intensity: 10_000_000.,
+                range: 100.0,
+                shadow_depth_bias: 0.2,
+                ..default()
+            },
+            Transform::from_xyz(0.0, 0.0, 50.0),
+        ));
 
         Ok(MapModel {
             map,
-            hex_mesh,
             terrain_materials,
-            light: light_entity,
             tile_entities,
         })
     }
@@ -122,7 +112,7 @@ impl MapModel {
         Vec2::new(x_raw - cx, -y_raw - cy)
     }
 
-    pub(crate) fn find_nearest_tile_entity(&self, world_pos: Vec2) -> Option<(usize, Entity)> {
+    pub(crate) fn find_nearest_tile(&self, world_pos: Vec2) -> Option<usize> {
         let mut best_i = None;
         let mut best_d2 = f32::INFINITY;
         for i in 0..self.map.tiles.len() {
@@ -133,7 +123,7 @@ impl MapModel {
                 best_i = Some(i);
             }
         }
-        best_i.map(|i| (i, self.tile_entities[i]))
+        best_i
     }
 
     pub(crate) fn set_tile_terrain(

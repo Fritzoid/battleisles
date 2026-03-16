@@ -36,7 +36,6 @@ impl Map {
         // Generate equal rows with hexx, then drop the rightmost hex on odd rows.
         // Resulting tile count: width*height - height/2 (e.g., 10*10 - 5 = 95).
         let tiles = shapes::pointy_rectangle([q_min, q_max, r_min, r_max])
-            .map(Hex::from)
             .filter(|h| {
                 let q = h.x; // axial q
                 let r = h.y; // axial r
@@ -60,7 +59,7 @@ impl Map {
 
     pub fn tile_to_world_pos(&self, tile: &Tile) -> (f32, f32) {
         let pos = self.layout.hex_to_world_pos(tile.position);
-        (pos.x as f32, pos.y as f32)
+        (pos.x, pos.y)
     }
 
     pub fn hex_size(&self) -> f32 {

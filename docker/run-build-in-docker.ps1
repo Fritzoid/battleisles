@@ -1,1 +1,0 @@
-docker run --rm -v ${pwd}:/usr/src/myapp my-rust-app

@@ -12,9 +12,20 @@ members = [
     "editor",
 ]
 
-[dependencies]
+[workspace.dependencies]
+battleisles_bevy = { path = "crates/battleisles_bevy", version = "0.1.0" }
 battleisles_domain = { path = "crates/battleisles_domain", version = "0.1.0" }
+battleisles_editor = { path = "crates/battleisles_editor", version = "0.1.0" }
 battleisles_game = { path = "crates/battleisles_game", version = "0.1.0" }
+bevy = "0.18.0"
+bevy_camera = "0.18.0"
+bevy_color = "0.18.0"
+bevy_egui = "0.39.0"
+getrandom = { version = "0.3", features = ["wasm_js"] }
+
+[dependencies]
+battleisles_domain = { workspace = true }
+battleisles_game = { workspace = true }
 
 [profile.dev.package."*"]
 opt-level = 3

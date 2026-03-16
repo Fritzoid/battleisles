@@ -1,1 +1,0 @@
-docker build --platform linux/amd64 --no-cache -f rust-bevy-builder.yml -t fritzoid/rust-bevy-builder . 

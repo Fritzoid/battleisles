@@ -1,7 +1,8 @@
 # battleisles
+
 Nostalgia version of battle isles 
 
-Using rust 1.74.1
+Using rust 1.90.0
 
 clone and run 'cargo run'
 
@@ -18,5 +19,4 @@ If you want wasm support:
     - run 'trunk serve'
 
 If you want to use a codespace, everything should be ready in .devcontainer
-
 
