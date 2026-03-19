@@ -7,7 +7,7 @@ use crate::map_model::MapModel;
 impl Plugin for MapModelPlugin {
     fn build(&self, app: &mut App) {
         app.add_message::<ApplyTerrainAt>()
-            .add_systems(Update, handle_apply_terrain_at);
+            .add_systems(Update, (handle_apply_terrain_at, draw_map_outlines));
     }
 }
 
@@ -44,5 +44,17 @@ fn handle_apply_terrain_at(
         if let Some(idx) = map_model.find_nearest_tile(world_pos) {
             map_model.set_tile_terrain(idx, terrain, &mut materials, &mut commands);
         }
+    }
+}
+
+fn draw_map_outlines(map_model: Option<Res<MapModel>>, mut gizmos: Gizmos) {
+    let Some(map_model) = map_model else {
+        return;
+    };
+
+    let color = MapModel::outline_color();
+    let z = MapModel::outline_z();
+    for &[start, end] in map_model.outline_segments() {
+        gizmos.line(start.extend(z), end.extend(z), color);
     }
 }

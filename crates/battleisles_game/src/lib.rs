@@ -1,13 +1,12 @@
+use battleisles_bevy::map_model::MapModel;
 use battleisles_bevy::map_model_plugin::MapModelPlugin;
 use battleisles_domain::map::Map;
 use bevy::prelude::*;
 use bevy::window::WindowMode;
 use bevy_camera::{OrthographicProjection, Projection, ScalingMode};
-use bevy_egui::{EguiPlugin, EguiPrimaryContextPass};
-
-mod ui;
 
 pub struct BattleIslesGame;
+const MAP_FIT_PADDING: f32 = 1.05;
 
 impl BattleIslesGame {
     pub fn run() {
@@ -16,17 +15,16 @@ impl BattleIslesGame {
                 primary_window: Some(Window {
                     mode: WindowMode::Windowed,
                     title: "Battle Isles".to_owned(),
-                    resolution: (800, 600).into(),
                     resizable: true,
                     canvas: Some("#bevy".to_owned()),
+                    fit_canvas_to_parent: true,
                     ..default()
                 }),
                 ..default()
             }))
-            .add_plugins(EguiPlugin::default())
             .add_plugins(MapModelPlugin)
             .add_systems(Startup, setup)
-            .add_systems(EguiPrimaryContextPass, ui::ui_system)
+            .add_systems(Update, fit_map_to_viewport)
             .run();
     }
 }
@@ -40,10 +38,7 @@ pub fn setup(
         Camera3d { ..default() },
         Projection::Orthographic(OrthographicProjection {
             scale: 0.1,
-            scaling_mode: ScalingMode::Fixed {
-                width: 800.0,
-                height: 600.0,
-            },
+            scaling_mode: ScalingMode::WindowSize,
             near: -1000.0,
             far: 1000.0,
             ..OrthographicProjection::default_3d()
@@ -60,4 +55,36 @@ pub fn setup(
         &mut materials,
     )
     .expect("Failed to initialize map model");
+}
+
+fn fit_map_to_viewport(
+    map_model: Option<Res<MapModel>>,
+    windows: Query<&Window>,
+    mut projections: Query<&mut Projection, With<Camera3d>>,
+) {
+    let Some(map_model) = map_model else {
+        return;
+    };
+    let Ok(window) = windows.single() else {
+        return;
+    };
+    let Ok(mut projection) = projections.single_mut() else {
+        return;
+    };
+    let map_size = map_model.map_size();
+    if map_size.x <= 0.0 || map_size.y <= 0.0 || window.width() <= 0.0 || window.height() <= 0.0 {
+        return;
+    }
+
+    if let Projection::Orthographic(OrthographicProjection {
+        scaling_mode,
+        scale,
+        ..
+    }) = &mut *projection
+    {
+        *scaling_mode = ScalingMode::WindowSize;
+        *scale = (map_size.x / window.width())
+            .max(map_size.y / window.height())
+            * MAP_FIT_PADDING;
+    }
 }

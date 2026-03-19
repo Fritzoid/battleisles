@@ -47,7 +47,7 @@ impl Map {
             })
             .map(|pos| Tile {
                 position: pos,
-                terrain: Terrain::DeepWater,
+                terrain: Terrain::Unassigned,
             })
             .collect::<Vec<Tile>>();
         Map {
@@ -62,6 +62,12 @@ impl Map {
         (pos.x, pos.y)
     }
 
+    pub fn tile_to_world_corners(&self, tile: &Tile) -> [(f32, f32); 6] {
+        self.layout
+            .hex_corners(tile.position)
+            .map(|corner| (corner.x, corner.y))
+    }
+
     pub fn hex_size(&self) -> f32 {
         self.hex_size
     }
@@ -69,6 +75,7 @@ impl Map {
 
 #[derive(PartialEq, Clone, Debug, Copy, Eq, Hash)]
 pub enum Terrain {
+    Unassigned,
     Plains,
     Hills,
     Mountains,
@@ -103,7 +110,7 @@ mod tests {
         let sut = Map::new(width, height);
         assert!(sut.tiles.len() == expected_tile_count);
         sut.tiles.iter().for_each(|tile| {
-            assert_eq!(tile.terrain, Terrain::DeepWater);
+            assert_eq!(tile.terrain, Terrain::Unassigned);
         });
     }
 }
