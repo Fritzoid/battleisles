@@ -131,6 +131,7 @@ impl Default for UiState {
 fn terrain_palette(ui: &mut egui::Ui, selected: &mut Terrain) {
     use bevy_color::palettes::basic::*;
     let items = [
+        (Terrain::Unassigned, WHITE, "Unassigned"),
         (Terrain::Plains, GREEN, "Plains"),
         (Terrain::Hills, OLIVE, "Hills"),
         (Terrain::Mountains, GRAY, "Mountains"),

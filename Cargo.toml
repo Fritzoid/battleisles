@@ -21,6 +21,7 @@ bevy = "0.18.0"
 bevy_camera = "0.18.0"
 bevy_color = "0.18.0"
 bevy_egui = "0.39.0"
+bevy_gizmos = "0.18.0"
 getrandom = { version = "0.3", features = ["wasm_js"] }
 
 [dependencies]

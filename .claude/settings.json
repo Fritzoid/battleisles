@@ -1,7 +1,24 @@
 {
   "permissions": {
     "allow": [
-      "Bash(wc -l /Users/fgos/projects/battleisles/crates/*/src/*.rs /Users/fgos/projects/battleisles/src/main.rs /Users/fgos/projects/battleisles/editor/src/main.rs)"
+      "Bash(wc -l /Users/fgos/projects/battleisles/crates/*/src/*.rs /Users/fgos/projects/battleisles/src/main.rs /Users/fgos/projects/battleisles/editor/src/main.rs)",
+      "Bash(cargo build:*)",
+      "Read(//Users/fgos/.cargo/registry/src/**)",
+      "Bash(grep -r \"pub struct MouseWheel\" ~/.cargo/registry/src/index.crates.io-*/bevy_input-0.18*/src/)",
+      "Bash(grep -B5 \"pub struct MouseWheel\" ~/.cargo/registry/src/index.crates.io-*/bevy_input-0.18*/src/mouse.rs)",
+      "Bash(grep -B15 \"pub struct MouseWheel\" ~/.cargo/registry/src/index.crates.io-*/bevy_input-0.18*/src/mouse.rs)",
+      "Bash(cargo test:*)",
+      "Bash(grep -r \"line_width\\\\|line_config\\\\|GizmoConfig\" ~/.cargo/registry/src/index.crates.io-*/bevy_gizmos-0.18*/src/config.rs)",
+      "Bash(grep -r \"pub struct GizmoConfig\" ~/.cargo/registry/src/index.crates.io-*/bevy_gizmos-0.18*/src/config.rs)",
+      "Bash(grep -A20 \"pub line_width\" ~/.cargo/registry/src/index.crates.io-*/bevy_gizmos-0.18*/src/config.rs)",
+      "Bash(grep -A30 \"pub struct GizmoConfig {\" ~/.cargo/registry/src/index.crates.io-*/bevy_gizmos-0.18*/src/config.rs)",
+      "Bash(grep -B5 -A20 \"pub struct GizmoLineConfig\" ~/.cargo/registry/src/index.crates.io-*/bevy_gizmos-0.18*/src/config.rs)",
+      "Bash(grep -r \"pub struct GizmoConfigStore\" ~/.cargo/registry/src/index.crates.io-*/bevy_gizmos-0.18*/src/)",
+      "Bash(grep -r \"GizmoConfigStore\" ~/.cargo/registry/src/index.crates.io-*/bevy-0.18*/src/)",
+      "Bash(grep \"GizmoConfigStore\\\\|DefaultGizmoConfigGroup\" ~/.cargo/registry/src/index.crates.io-*/bevy_gizmos-0.18*/src/lib.rs)",
+      "Bash(grep \"gizmos\" ~/.cargo/registry/src/index.crates.io-*/bevy-0.18*/src/lib.rs)",
+      "Bash(grep -ri \"gizmos\\\\|GizmoConfig\" ~/.cargo/registry/src/index.crates.io-*/bevy-0.18*/src/prelude.rs)",
+      "Bash(find ~/.cargo/registry/src/index.crates.io-*/bevy-0.18* -name \"*.rs\" -maxdepth 2)"
     ]
   }
 }

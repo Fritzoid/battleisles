@@ -1,3 +1,4 @@
+use battleisles_bevy::camera::{CameraZoom, CameraZoomPlugin};
 use battleisles_bevy::map_model::MapModel;
 use battleisles_bevy::map_model_plugin::MapModelPlugin;
 use battleisles_domain::map::Map;
@@ -23,6 +24,7 @@ impl BattleIslesGame {
                 ..default()
             }))
             .add_plugins(MapModelPlugin)
+            .add_plugins(CameraZoomPlugin)
             .add_systems(Startup, setup)
             .add_systems(Update, fit_map_to_viewport)
             .run();
@@ -47,7 +49,6 @@ pub fn setup(
         GlobalTransform::default(),
     ));
 
-    // Initialize any resources or entities needed for the editor
     MapModelPlugin::initialize_map_model(
         Map::new(5, 5),
         &mut commands,
@@ -60,6 +61,7 @@ pub fn setup(
 fn fit_map_to_viewport(
     map_model: Option<Res<MapModel>>,
     windows: Query<&Window>,
+    mut zoom: ResMut<CameraZoom>,
     mut projections: Query<&mut Projection, With<Camera3d>>,
 ) {
     let Some(map_model) = map_model else {
@@ -83,6 +85,9 @@ fn fit_map_to_viewport(
     }) = &mut *projection
     {
         *scaling_mode = ScalingMode::WindowSize;
-        *scale = (map_size.x / window.width()).max(map_size.y / window.height()) * MAP_FIT_PADDING;
+        let base =
+            (map_size.x / window.width()).max(map_size.y / window.height()) * MAP_FIT_PADDING;
+        zoom.base_scale = base;
+        *scale = base * zoom.factor;
     }
 }

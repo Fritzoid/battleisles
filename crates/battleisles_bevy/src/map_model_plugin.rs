@@ -1,5 +1,6 @@
 use battleisles_domain::map::Map;
 use bevy::prelude::*;
+use bevy_gizmos::config::{DefaultGizmoConfigGroup, GizmoConfigStore};
 
 pub struct MapModelPlugin;
 use crate::map_model::MapModel;
@@ -7,8 +8,14 @@ use crate::map_model::MapModel;
 impl Plugin for MapModelPlugin {
     fn build(&self, app: &mut App) {
         app.add_message::<ApplyTerrainAt>()
+            .add_systems(Startup, configure_gizmos)
             .add_systems(Update, (handle_apply_terrain_at, draw_map_outlines));
     }
+}
+
+fn configure_gizmos(mut config_store: ResMut<GizmoConfigStore>) {
+    let (config, _) = config_store.config_mut::<DefaultGizmoConfigGroup>();
+    config.line.width = 0.5;
 }
 
 impl MapModelPlugin {

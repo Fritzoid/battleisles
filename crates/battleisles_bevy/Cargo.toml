@@ -8,4 +8,6 @@ battleisles_domain = { workspace = true }
 getrandom = { workspace = true }
 bevy = { workspace = true }
 bevy_color = { workspace = true }
+bevy_camera = { workspace = true }
 bevy_egui = { workspace = true }
+bevy_gizmos = { workspace = true }

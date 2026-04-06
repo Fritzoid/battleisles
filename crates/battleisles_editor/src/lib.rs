@@ -1,11 +1,15 @@
+use battleisles_bevy::camera::{CameraZoom, CameraZoomPlugin};
+use battleisles_bevy::map_model::MapModel;
 use battleisles_bevy::map_model_plugin::MapModelPlugin;
 use battleisles_domain::map::Map;
 use bevy::prelude::*;
-use bevy::window::{WindowMode, WindowResized};
+use bevy::window::WindowMode;
 use bevy_camera::{OrthographicProjection, Projection, ScalingMode};
 use bevy_egui::{EguiPlugin, EguiPrimaryContextPass};
 
 mod ui;
+
+const MAP_FIT_PADDING: f32 = 1.05;
 
 #[derive(Message, Event)]
 pub struct GenerateMapEvent {
@@ -36,6 +40,7 @@ impl BattleIslesEditor {
                 ..default()
             }))
             .add_plugins(MapModelPlugin)
+            .add_plugins(CameraZoomPlugin)
             .add_plugins(EguiPlugin::default())
             .add_systems(Startup, setup)
             .add_systems(
@@ -44,23 +49,23 @@ impl BattleIslesEditor {
             )
             .add_systems(
                 Update,
-                (handle_generate_map_event, handle_map_changed_event),
+                (
+                    handle_generate_map_event,
+                    handle_map_changed_event,
+                    fit_map_to_viewport,
+                ),
             )
             .run();
     }
 }
 
 pub fn setup(mut commands: Commands) {
-    // Initialize any resources or entities needed for the editor
     commands.insert_resource(ui::UiState::default());
     commands.spawn((
         Camera3d { ..default() },
         Projection::Orthographic(OrthographicProjection {
             scale: 0.1,
-            scaling_mode: ScalingMode::Fixed {
-                width: 800.0,
-                height: 600.0,
-            },
+            scaling_mode: ScalingMode::WindowSize,
             near: -1000.0,
             far: 1000.0,
             ..OrthographicProjection::default_3d()
@@ -68,6 +73,40 @@ pub fn setup(mut commands: Commands) {
         Transform::from_xyz(0.0, 0.0, 1000.0).looking_at(Vec3::ZERO, Vec3::Y),
         GlobalTransform::default(),
     ));
+}
+
+fn fit_map_to_viewport(
+    map_model: Option<Res<MapModel>>,
+    windows: Query<&Window>,
+    mut zoom: ResMut<CameraZoom>,
+    mut projections: Query<&mut Projection, With<Camera3d>>,
+) {
+    let Some(map_model) = map_model else {
+        return;
+    };
+    let Ok(window) = windows.single() else {
+        return;
+    };
+    let Ok(mut projection) = projections.single_mut() else {
+        return;
+    };
+    let map_size = map_model.map_size();
+    if map_size.x <= 0.0 || map_size.y <= 0.0 || window.width() <= 0.0 || window.height() <= 0.0 {
+        return;
+    }
+
+    if let Projection::Orthographic(OrthographicProjection {
+        scaling_mode,
+        scale,
+        ..
+    }) = &mut *projection
+    {
+        *scaling_mode = ScalingMode::WindowSize;
+        let base =
+            (map_size.x / window.width()).max(map_size.y / window.height()) * MAP_FIT_PADDING;
+        zoom.base_scale = base;
+        *scale = base * zoom.factor;
+    }
 }
 
 fn handle_generate_map_event(
@@ -89,7 +128,6 @@ fn handle_generate_map_event(
         {
             Ok(_) => {
                 println!("Map generated successfully");
-                // Send MapChangedEvent to trigger camera update
                 map_changed_events.write(MapChangedEvent);
             }
             Err(e) => println!("Failed to generate map: {:?}", e),
@@ -99,18 +137,10 @@ fn handle_generate_map_event(
 
 fn handle_map_changed_event(
     mut events: MessageReader<MapChangedEvent>,
-    mut window_events: MessageWriter<WindowResized>,
-    window_query: Query<(Entity, &Window)>,
+    mut zoom: ResMut<CameraZoom>,
 ) {
     for _event in events.read() {
-        println!("Map changed, triggering camera update");
-        // Send a fake WindowResized event to trigger the camera update
-        if let Ok((entity, window)) = window_query.single() {
-            window_events.write(WindowResized {
-                window: entity,
-                width: window.resolution.physical_width() as f32,
-                height: window.resolution.physical_height() as f32,
-            });
-        }
+        println!("Map changed, resetting zoom");
+        zoom.factor = 1.0;
     }
 }

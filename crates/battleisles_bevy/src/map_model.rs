@@ -1,5 +1,5 @@
 use crate::terrain_materials::TerrainMaterials;
-use battleisles_domain::map::Map;
+use battleisles_domain::map::{Map, Terrain};
 use bevy::prelude::*;
 use std::collections::HashSet;
 
@@ -159,6 +159,10 @@ impl MapModel {
         let mut segments = Vec::with_capacity(map.tiles.len() * 3);
 
         for tile in &map.tiles {
+            if tile.terrain != Terrain::Unassigned {
+                continue;
+            }
+
             let corners = map
                 .tile_to_world_corners(tile)
                 .map(|(x_raw, y_raw)| Vec2::new(x_raw - center.0, -y_raw - center.1));
@@ -173,6 +177,11 @@ impl MapModel {
         }
 
         segments
+    }
+
+    fn rebuild_outlines(&mut self) {
+        let center = self.center_from_bounds();
+        self.outline_segments = Self::build_outline_segments(&self.map, center);
     }
 
     fn center_from_bounds(&self) -> (f32, f32) {
@@ -215,6 +224,7 @@ impl MapModel {
             let entity = self.tile_entities[index];
             let handle = self.terrain_materials.get_or_create(terrain, materials);
             commands.entity(entity).insert(MeshMaterial3d(handle));
+            self.rebuild_outlines();
         }
     }
 }
