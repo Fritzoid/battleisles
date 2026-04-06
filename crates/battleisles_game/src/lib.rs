@@ -83,8 +83,6 @@ fn fit_map_to_viewport(
     }) = &mut *projection
     {
         *scaling_mode = ScalingMode::WindowSize;
-        *scale = (map_size.x / window.width())
-            .max(map_size.y / window.height())
-            * MAP_FIT_PADDING;
+        *scale = (map_size.x / window.width()).max(map_size.y / window.height()) * MAP_FIT_PADDING;
     }
 }
