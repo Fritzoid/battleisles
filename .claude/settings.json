@@ -1,0 +1,7 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(wc -l /Users/fgos/projects/battleisles/crates/*/src/*.rs /Users/fgos/projects/battleisles/src/main.rs /Users/fgos/projects/battleisles/editor/src/main.rs)"
+    ]
+  }
+}
