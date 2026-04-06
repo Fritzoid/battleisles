@@ -18,7 +18,9 @@
       "Bash(grep \"GizmoConfigStore\\\\|DefaultGizmoConfigGroup\" ~/.cargo/registry/src/index.crates.io-*/bevy_gizmos-0.18*/src/lib.rs)",
       "Bash(grep \"gizmos\" ~/.cargo/registry/src/index.crates.io-*/bevy-0.18*/src/lib.rs)",
       "Bash(grep -ri \"gizmos\\\\|GizmoConfig\" ~/.cargo/registry/src/index.crates.io-*/bevy-0.18*/src/prelude.rs)",
-      "Bash(find ~/.cargo/registry/src/index.crates.io-*/bevy-0.18* -name \"*.rs\" -maxdepth 2)"
+      "Bash(find ~/.cargo/registry/src/index.crates.io-*/bevy-0.18* -name \"*.rs\" -maxdepth 2)",
+      "Bash(cargo clippy:*)",
+      "Bash(cargo fmt:*)"
     ]
   }
 }
