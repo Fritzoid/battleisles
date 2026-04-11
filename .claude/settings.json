@@ -20,7 +20,24 @@
       "Bash(grep -ri \"gizmos\\\\|GizmoConfig\" ~/.cargo/registry/src/index.crates.io-*/bevy-0.18*/src/prelude.rs)",
       "Bash(find ~/.cargo/registry/src/index.crates.io-*/bevy-0.18* -name \"*.rs\" -maxdepth 2)",
       "Bash(cargo clippy:*)",
-      "Bash(cargo fmt:*)"
+      "Bash(cargo fmt:*)",
+      "Bash(curl -s \"https://www.google.com/search?q=hex+terrain+transition+blending+technique+game+development\")",
+      "Bash(curl -s \"https://www.google.com/search?q=civilization+vi+hex+terrain+blending+how+it+works\")",
+      "WebSearch",
+      "WebFetch(domain:nicolaschavez.com)",
+      "WebFetch(domain:wiki.wesnoth.org)",
+      "WebFetch(domain:www.gamedev.net)",
+      "WebFetch(domain:catlikecoding.com)",
+      "WebFetch(domain:gamedev.net)",
+      "WebFetch(domain:github.com)",
+      "WebFetch(domain:community.monogame.net)",
+      "WebFetch(domain:dev.to)",
+      "WebFetch(domain:community.amplitude-studios.com)",
+      "WebFetch(domain:www.redblobgames.com)",
+      "WebFetch(domain:godotshaders.com)",
+      "WebFetch(domain:excaliburjs.com)",
+      "WebFetch(domain:www.gobsandgods.com)",
+      "WebFetch(domain:procworld.blogspot.com)"
     ]
   }
 }
