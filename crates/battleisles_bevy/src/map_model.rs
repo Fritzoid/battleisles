@@ -86,7 +86,7 @@ impl MapModel {
 
         commands.spawn((
             PointLight {
-                shadows_enabled: true,
+                shadow_maps_enabled: true,
                 intensity: 10_000_000.,
                 range: 100.0,
                 shadow_depth_bias: 0.2,
