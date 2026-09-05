@@ -3,6 +3,7 @@ use battleisles_bevy::map_model_plugin::ApplyTerrainAt;
 use battleisles_domain::map::Terrain;
 use bevy::input::ButtonInput;
 use bevy::prelude::*;
+use bevy_egui::egui::{LayerId, Ui, UiBuilder};
 use bevy_egui::{egui, EguiContexts};
 
 #[derive(Resource)]
@@ -24,7 +25,7 @@ pub fn paint_click_system(
     let Ok(ctx) = contexts.ctx_mut() else {
         return;
     };
-    if ctx.wants_pointer_input() {
+    if ctx.egui_wants_pointer_input() {
         return;
     }
     if !mouse.just_pressed(MouseButton::Left) {
@@ -60,10 +61,18 @@ pub fn ui_system(
         return;
     };
 
+    let mut root = Ui::new(
+        ctx.clone(),
+        "root".into(),
+        UiBuilder::new()
+            .layer_id(LayerId::background())
+            .max_rect(ctx.viewport_rect()),
+    );
+
     // Top panel
-    egui::TopBottomPanel::top("top_panel")
-        .default_height(50.0)
-        .show(ctx, |ui| {
+    egui::Panel::top("top_panel")
+        .default_size(50.0)
+        .show(&mut root, |ui| {
             ui.horizontal(|ui| {
                 ui.label("Map Width:");
                 ui.add(
@@ -89,25 +98,25 @@ pub fn ui_system(
         });
 
     // Bottom panel
-    egui::TopBottomPanel::bottom("bottom_panel")
-        .default_height(50.0)
-        .show(ctx, |ui| {
+    egui::Panel::bottom("bottom_panel")
+        .default_size(50.0)
+        .show(&mut root, |ui| {
             ui.add(egui::Label::new("Bottom Panel"));
         });
 
     // Left panel: terrain palette
-    egui::SidePanel::left("left_panel")
-        .default_width(140.0)
-        .show(ctx, |ui| {
+    egui::Panel::left("left_panel")
+        .default_size(140.0)
+        .show(&mut root, |ui| {
             ui.heading("Terrain");
             ui.separator();
             terrain_palette(ui, &mut ui_state.selected_terrain);
         });
 
     // Right panel
-    egui::SidePanel::right("right_panel")
-        .default_width(100.0)
-        .show(ctx, |ui| {
+    egui::Panel::right("right_panel")
+        .default_size(100.0)
+        .show(&mut root, |ui| {
             ui.add(egui::Label::new("Right Panel"));
         });
 

@@ -2,7 +2,7 @@
 
 Nostalgia version of battle isles 
 
-Using rust 1.90.0
+Using stable Rust (1.95 or newer, pinned to stable in rust-toolchain.toml)
 
 clone and run 'cargo run'
 
