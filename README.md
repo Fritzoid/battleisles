@@ -2,7 +2,7 @@
 
 Nostalgia version of battle isles 
 
-Using stable Rust (1.95 or newer, pinned to stable in rust-toolchain.toml)
+Using Rust 1.98.1, pinned in rust-toolchain.toml (rustup installs it automatically on first build). CI uses the same file.
 
 clone and run 'cargo run'
 

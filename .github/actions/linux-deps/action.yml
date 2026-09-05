@@ -1,0 +1,22 @@
+name: Install Linux dependencies
+description: System packages needed to build Bevy (audio, input, windowing, GL) on Ubuntu/Debian.
+runs:
+  using: composite
+  steps:
+    - name: Install Linux dependencies
+      shell: bash
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y --no-install-recommends \
+          file \
+          pkg-config \
+          libasound2-dev \
+          libudev-dev \
+          libwayland-dev \
+          libxkbcommon-dev \
+          libx11-dev \
+          libxcursor-dev \
+          libxi-dev \
+          libxrandr-dev \
+          libxinerama-dev \
+          libgl1-mesa-dev

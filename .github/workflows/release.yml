@@ -7,7 +7,6 @@ on:
 
 env:
   CARGO_TERM_COLOR: always
-  CARGO_HOME: ${{ github.workspace }}/.cargo
   RUST_BACKTRACE: 1
 
 permissions:
@@ -65,33 +64,19 @@ jobs:
     name: Build
     needs: create-release
     runs-on: ubuntu-latest
-    container:
-      image: rust:1.90.0-bookworm
     defaults:
       run:
         shell: bash
     steps:
       - uses: actions/checkout@v4
 
-      - name: Install Linux dependencies
-        run: |
-          apt-get update
-          apt-get install -y --no-install-recommends \
-            file \
-            pkg-config \
-            libasound2-dev \
-            libudev-dev \
-            libwayland-dev \
-            libxkbcommon-dev \
-            libx11-dev \
-            libxcursor-dev \
-            libxi-dev \
-            libxrandr-dev \
-            libxinerama-dev \
-            libgl1-mesa-dev
+      - uses: ./.github/actions/linux-deps
+
+      # Reads the exact version, components and targets from rust-toolchain.toml.
+      - uses: dtolnay/rust-toolchain@stable
 
       - name: Build release
-        run: cargo build --release --workspace
+        run: cargo build --release --workspace --locked
 
       - name: Package release bundle
         run: |

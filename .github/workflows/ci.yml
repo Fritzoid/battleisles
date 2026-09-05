@@ -8,7 +8,6 @@ on:
 
 env:
   CARGO_TERM_COLOR: always
-  CARGO_HOME: ${{ github.workspace }}/.cargo
   RUST_BACKTRACE: 1
 
 permissions:
@@ -18,50 +17,17 @@ jobs:
   lint:
     name: Lint
     runs-on: ubuntu-latest
-    container:
-      image: rust:1.90.0-bookworm
-    permissions:
-      contents: read
     steps:
       - uses: actions/checkout@v4
 
-      - name: Install Linux dependencies
-        run: |
-          apt-get update
-          apt-get install -y --no-install-recommends \
-            file \
-            pkg-config \
-            libasound2-dev \
-            libudev-dev \
-            libwayland-dev \
-            libxkbcommon-dev \
-            libx11-dev \
-            libxcursor-dev \
-            libxi-dev \
-            libxrandr-dev \
-            libxinerama-dev \
-            libgl1-mesa-dev
+      - uses: ./.github/actions/linux-deps
 
-      - name: Install Rust components
-        run: rustup component add rustfmt clippy
+      # Reads the exact version, components and targets from rust-toolchain.toml.
+      - uses: dtolnay/rust-toolchain@stable
 
-      - name: Cache cargo registry
-        uses: actions/cache@v4
+      - uses: Swatinem/rust-cache@v2
         with:
-          path: .cargo/registry
-          key: ${{ runner.os }}-cargo-registry-${{ hashFiles('**/Cargo.lock') }}
-
-      - name: Cache cargo index
-        uses: actions/cache@v4
-        with:
-          path: .cargo/git
-          key: ${{ runner.os }}-cargo-git-${{ hashFiles('**/Cargo.lock') }}
-
-      - name: Cache target directory
-        uses: actions/cache@v4
-        with:
-          path: target
-          key: ${{ runner.os }}-target-lint-${{ hashFiles('**/Cargo.lock') }}
+          shared-key: lint
 
       - name: Check formatting
         run: cargo fmt --all --check
@@ -72,98 +38,36 @@ jobs:
   test:
     name: Test
     runs-on: ubuntu-latest
-    container:
-      image: rust:1.90.0-bookworm
-    permissions:
-      contents: read
     steps:
       - uses: actions/checkout@v4
 
-      - name: Install Linux dependencies
-        run: |
-          apt-get update
-          apt-get install -y --no-install-recommends \
-            file \
-            pkg-config \
-            libasound2-dev \
-            libudev-dev \
-            libwayland-dev \
-            libxkbcommon-dev \
-            libx11-dev \
-            libxcursor-dev \
-            libxi-dev \
-            libxrandr-dev \
-            libxinerama-dev \
-            libgl1-mesa-dev
+      - uses: ./.github/actions/linux-deps
 
-      - name: Cache cargo registry
-        uses: actions/cache@v4
-        with:
-          path: .cargo/registry
-          key: ${{ runner.os }}-cargo-registry-${{ hashFiles('**/Cargo.lock') }}
+      - uses: dtolnay/rust-toolchain@stable
 
-      - name: Cache cargo index
-        uses: actions/cache@v4
+      - uses: Swatinem/rust-cache@v2
         with:
-          path: .cargo/git
-          key: ${{ runner.os }}-cargo-git-${{ hashFiles('**/Cargo.lock') }}
-
-      - name: Cache target directory
-        uses: actions/cache@v4
-        with:
-          path: target
-          key: ${{ runner.os }}-target-test-${{ hashFiles('**/Cargo.lock') }}
+          shared-key: test
 
       - name: Run tests
-        run: cargo test --workspace
+        run: cargo test --workspace --locked
 
   build:
     name: Build
     runs-on: ubuntu-latest
-    container:
-      image: rust:1.90.0-bookworm
-    permissions:
-      contents: read
     steps:
       - uses: actions/checkout@v4
 
-      - name: Install Linux dependencies
-        run: |
-          apt-get update
-          apt-get install -y --no-install-recommends \
-            file \
-            pkg-config \
-            libasound2-dev \
-            libudev-dev \
-            libwayland-dev \
-            libxkbcommon-dev \
-            libx11-dev \
-            libxcursor-dev \
-            libxi-dev \
-            libxrandr-dev \
-            libxinerama-dev \
-            libgl1-mesa-dev
+      - uses: ./.github/actions/linux-deps
 
-      - name: Cache cargo registry
-        uses: actions/cache@v4
-        with:
-          path: .cargo/registry
-          key: ${{ runner.os }}-cargo-registry-${{ hashFiles('**/Cargo.lock') }}
+      - uses: dtolnay/rust-toolchain@stable
 
-      - name: Cache cargo index
-        uses: actions/cache@v4
+      - uses: Swatinem/rust-cache@v2
         with:
-          path: .cargo/git
-          key: ${{ runner.os }}-cargo-git-${{ hashFiles('**/Cargo.lock') }}
-
-      - name: Cache target directory
-        uses: actions/cache@v4
-        with:
-          path: target
-          key: ${{ runner.os }}-target-build-${{ hashFiles('**/Cargo.lock') }}
+          shared-key: build
 
       - name: Build release
-        run: cargo build --release --workspace
+        run: cargo build --release --workspace --locked
 
       - name: Check binaries
         run: |
